@@ -1,0 +1,213 @@
+@import url(https://fonts.googleapis.com/css?family=Roboto:400);
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Open Sans", Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+  margin: 0;
+  padding: 0;
+  color: black;
+  background: #F7F8FC;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: "IBM Plex Mono", monospace;
+  color: #3E58E8;
+}
+
+h1, h2 {
+  font-size: 2em;
+}
+
+h3 {
+  margin-top: 36px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh;
+}
+.settings {
+  background: white;
+  margin-right: 24px;
+  padding: 24px;
+  width: 310px;
+  min-width:310px;
+  transition: .5s all;
+  overflow: hidden;
+  position: relative;
+}
+
+.settings.hide {
+  width: 0;
+  min-width: 0;
+  padding: 0;
+}
+
+#drawerBtn {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  padding: 0;
+  font-weight: 900;
+}
+
+.main {
+  padding: 24px;
+}
+
+.setting {
+  text-align: left;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.setting label {
+  display: inline-block;
+  font-weight: bold;
+  margin-bottom: 5px;
+  margin-right: 14px;
+  width: 150px;
+}
+
+input[type="number"], select {
+  width: 80px;
+  height: 30px;
+  margin-right: 4px;
+  padding: 8px 10px;
+  font-size: inherit;
+  border: 0;
+  background: #EFF0F6;
+  color: #3F59E8;
+  border-radius: 5px;
+}
+
+select {
+  vertical-align: middle;
+}
+
+button, .button {
+  -webkit-appearance: none;
+  display: inline-block;
+  margin: 0;
+  margin-right: 8px;
+  padding: 8px 24px;
+  border: 0;
+  font-family: inherit;
+  font-size: 14px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 2px solid #F1F2F6;
+  border-radius: 5px;
+  background: white;
+  color: #573F8F;
+  font-weight: bold;
+  letter-spacing: 2px;
+  transition: all 0.2s linear;
+  vertical-align: middle;
+}
+
+.button:link, .button:visited {
+  text-decoration: none;
+}
+
+button:hover, .button:hover {
+  color: white;
+  background: #3E58E8;
+  border-color: #3E58E8;
+}
+
+button.no-border {
+  border: none;
+  padding: 0;
+}
+
+input[type="file"] {
+  width: 0;
+  height: 0;
+  opacity: 0;
+  cursor: pointer;
+  display: none;
+}
+
+svg {
+  display: block;
+  background: white;
+}
+rect {
+  pointer-events: all;
+  margin: 0 2px;
+  transition: fill 0.2s linear;
+}
+rect.hover:hover {
+  opacity: 0.5;
+}
+rect.playing {
+  fill: hotpink;
+}
+rect.current, rect.current-all {
+  /* outline-offset: -4px;
+  outline: 4px solid black; */
+  fill: #EB53A6;
+}
+rect.attention-all {
+  fill: #83F85B;
+}
+rect.attention-all.second {
+  fill: red;
+}
+rect.no-attention-all {
+  fill: #F3F3F7;
+}
+svg path {
+  pointer-events: none;
+}
+#velocities {
+  margin-top: 14px;
+}
+
+/*******
+ * Head selection checkboxes 
+ */
+#headColors {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  min-height: 40px;
+  min-width: 20px;
+}
+
+#headColors input[type="checkbox"] {
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+#headColors input[type="checkbox"] + label {
+  cursor: pointer;
+  display: inline-block !important;
+  width: 30px;
+  height: 30px;
+  border: 3px solid transparent;
+  margin-right: 8px;
+}
+#headColors input[type=checkbox]:checked + label {
+  border: 3px solid black;
+}
+
+#stepText {
+  font-weight: bold;
+  height: 30px;
+}
+
+.visualizer-container {
+  background: white;
+}

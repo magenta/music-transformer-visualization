@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Bach</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="./style.css">
+    <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono:400|Open+Sans" rel="stylesheet">
+    <script src="./script.js" type="module" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@magenta/music@1.2.1"></script>
+  </head>
+  <body>
+    <div class="wrapper">
+      <div class="settings">
+      <h3>Piano roll</h3>
+      <div class="setting" id="noteWidth">
+        <label>Note width (px)</label>
+        <input id="noteWidthInput" type="number" value="50" min="0" max="200" step="1">
+      </div>
+      <div class="setting">
+        <label>Note height (px)</label>
+        <input id="noteHeightInput" type="number" value="8" min="0" max="200" step="1">
+      </div>
+      <div class="setting">
+        <label>Animate speed (ms)</label>
+        <input id="playSpeedInput" type="number" value="500" min="0" max="5000" step="50">
+      </div>
+
+      <h3>Attention weights</h3>
+      <div class="setting">
+        <label>Circle paths</label>
+        <input id="circleInput" type="checkbox" checked>
+      </div>
+      <div class="setting">
+        <label>Arrow cutoff weight</label>
+        <input id="cutoffInput" type="number" value="0.5" min="0" max="1" step="0.01">
+      </div>
+      <div class="setting">
+        <label>Epsilon</label>
+        <input id="epsilonInput" type="number" value="0.00001" min="0" max="1" step="0.0001">
+      </div>
+      <div class="setting">
+        <label>Top weights only</label>
+        <input id="topOnlyInput" type="checkbox">
+      </div>
+      <div class="setting">
+        <label>Top #</label>
+        <input id="topAmountInput" type="number" value="10" min="0" max="100" step="1">
+      </div>
+
+      <h3>Current state</h3>      
+      <div class="setting">
+        <label>Step</label>
+        <span id="stepText"></span>
+      </div>
+      <div class="setting">
+        <label>Layer</label>
+        <select id="layers"></select>
+      </div>
+      <div class="setting">
+        <label>Head</label>
+        <select id="heads"></select>
+      </div>
+      <div class="setting">
+        <div id="headColors"></div>
+      </div>
+
+      <h3>Audio roll</h3>
+      <div id="stepsPerQuarter" class="setting">
+        <label>Steps/quarter: </label>
+        <input id="stepsInput" type="number" value="80" min="0" max="200" step="1">
+      </div>
+      <div id="pixelsPerTimeStep" class="setting">
+        <label>Time scale </label>
+        <input id="pixelsInput" type="number" value="1" min="0" max="200" step="1">
+      </div>
+    </div>
+    <div class="main">
+      <h1><button id="drawerBtn">&lt;</button> Transformer visualization — Bach</h1>
+      <p>
+        <label class="button">+ Load file
+          <input id="loadBtn" type="file">
+        </label>
+        <button id="resetBtn">Reset</button>
+        <button id="animateBtn">Animate</button>
+        <button id="playBtn">Play Audio</button>
+        <button id="downloadBtn">Download MIDI</button>
+        <span id="filenameSpan"></span>
+      </p>
+      <br>
+      <svg id="music"></svg>
+      <heat-map id="heat"></heat-map>
+    </div>
+   
+    <div class="glitchButton" style="position:fixed;top:20px;right:20px;"></div>
+    <script src="https://button.glitch.me/button.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js" defer></script>
+  </body>
+</html>
