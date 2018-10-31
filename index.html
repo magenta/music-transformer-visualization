@@ -9,10 +9,32 @@
     <link rel="stylesheet" href="./style.css">
     <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono:400|Open+Sans" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@magenta/music@1.2.1"></script>
+    <style>
+      body {
+        max-width: 1000px;
+      }
+      p, div {
+        font-size: 18px;
+        line-height: 1.5;
+      }
+    </style>
   </head>
   <body>
     <div class="main">
       <h1>Visualizing Music Transformer</h1>
+
+      <p>There are three possible visualizations currently available: relative
+        attention visualizations for either a Bach corale or a piano performance
+        piece, as well as a relative vs regular attention analysis for an example
+        piece:
+      </p>
+      <p>
+      <a class="button" href="./bach.html">Bach visualizer</a>
+      <br>
+      <a class="button" href="./performance.html">Piano performance visualizer</a>
+      <br>
+      <a class="button" href="./bach_duo.html">Analyze relative vs. regular attention</a>
+      </p>
 
       <h2>Paper figures</h2>
       <div><a class="button" href="./bach.html#figure=1a">Fig. 1a</a>: Multiple head visualization of a Bach chorale.</div>
@@ -22,13 +44,13 @@
       <div><a class="button" href="./performance.html#figure=3a">Fig. 3a</a>Visualizing motifs in a Piano performance piece. <b>Note:</b> this loads a large file, and it takes a bit to load.</div>
       <div><a class="button" href="./performance.html#figure=3a">Fig. 3b</a>Visualizing motifs in a Piano performance piece. <b>Note:</b> this loads a large file, and it takes a bit to load.</div>
 
-      <h2>Interactive Visualizations</h2>
-      <h3>Visualizing Single attention:</h3>
-      <a class="button" href="./bach.html">Bach</a>
-      <a class="button" href="./performance.html">Performance</a>
+      <h2>Paper videos</h2>
+      <h3>Animated multiple head visualization of a Bach chorale:</h3>
+      <video src="https://storage.googleapis.com/nips-workshop-visualization/files/figure1a_bach_rel.mkv" controls></video>
 
-      <h3>Analysis of the Relative vs. Regular attention for an existing piece:</h3>
-      <a class="button" href="./bach_duo.html">Bach</a>
+      <h3>Animated multiple head visualization of a piano performance:</h3>
+      <video src="https://storage.googleapis.com/nips-workshop-visualization/files/perf_triangles.mkv" controls></video>
+
     </div>
 
     <div class="glitchButton" style="position:fixed;top:20px;right:20px;"></div>
