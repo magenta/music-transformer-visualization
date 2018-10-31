@@ -3,8 +3,10 @@ import { AppManager } from './app_manager.js';
 import { TYPES, svgNS, getLocationHash, drawMusicLine } from './utils.js';
 
 // Globals, globals for everyone.
+// TODO: fix this parsing
 const KIND = window.location.pathname.substr(1).replace('.html','')
-    .replace('nips-workshop-visualization/','');
+    .replace('nips-workshop-visualization/','')
+    .replace('/transformer-visualization/', '');
 
 let initialConfig = {};
 initialConfig.url = KIND ===  TYPES.BACH ?
