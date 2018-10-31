@@ -155,18 +155,18 @@ function hashChanged() {
         initialConfig.layer = 3;
         break;
       case '1d': // duo
-        initialConfig.url = './files/bach_duo.json';
+        initialConfig.url = 'https://storage.googleapis.com/nips-workshop-visualization/files/bach_duo.json';
         initialConfig.step = 403;
         initialConfig.top = 80;
         initialConfig.noteWidth = 5;
         break;
       case '3a': // performance
-        initialConfig.url = './files/performance_big.json';
+        initialConfig.url = 'https://storage.googleapis.com/nips-workshop-visualization/files/performance_big.json';
         initialConfig.step = 895;
         initialConfig.top = 80;
         break;
       case '3b': // performance
-        initialConfig.url = './files/performance_big.json';
+        initialConfig.url = 'https://storage.googleapis.com/nips-workshop-visualization/files/performance_big.json';
         initialConfig.step = 948;
         initialConfig.top = 80;
         break;
