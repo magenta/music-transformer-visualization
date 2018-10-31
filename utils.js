@@ -1,13 +1,14 @@
-export { TYPES, svgNS, 
-    COLORS, 
-    LOCAL_COLORS_ALL, GLOBAL_COLORS_ALL, 
+export { TYPES, svgNS,
+    COLORS, SINGLE_COLORS_BLUE,
+    LOCAL_COLORS_ALL, GLOBAL_COLORS_ALL,
     LOCAL_COLORS_SINGLE, GLOBAL_COLORS_SINGLE,
-    rgb, 
-    getColorForWeight, scaleArray,
-    makeOption, makeHeadSelector, scaleNote,
+    getLocationHash,
+    rgb,
+    getColorForWeight, getColorForUnscaledWeight, scaleArray,
+    drawMusicLine, makeOption, makeHeadSelector, scaleNote,
     makeRect, makePath, makeLine, getConnectorLocation};
 
-const TYPES = {BACH: 'bach', PERFORMANCE: 'performance', DOUBLE: 'double_bach'};
+const TYPES = {BACH: 'bach', PERFORMANCE: 'performance', DOUBLE: 'bach_duo'};
 
 function scaleArray(arr) {
   const max = Math.max(...arr);
@@ -49,24 +50,34 @@ const GLOBAL_COLORS_SINGLE = [
 
 // In two-attention mode, when painting all heads, just use two different colours.
 const LOCAL_COLORS_ALL = [ // red
-  {min: rgb('ffd6d6'), max: rgb('e6194B')}, 
   {min: rgb('ffd6d6'), max: rgb('e6194B')},
   {min: rgb('ffd6d6'), max: rgb('e6194B')},
   {min: rgb('ffd6d6'), max: rgb('e6194B')},
   {min: rgb('ffd6d6'), max: rgb('e6194B')},
-  {min: rgb('ffd6d6'), max: rgb('e6194B')}, 
   {min: rgb('ffd6d6'), max: rgb('e6194B')},
-  {min: rgb('ffd6d6'), max: rgb('e6194B')} 
+  {min: rgb('ffd6d6'), max: rgb('e6194B')},
+  {min: rgb('ffd6d6'), max: rgb('e6194B')},
+  {min: rgb('ffd6d6'), max: rgb('e6194B')}
 ];
 const GLOBAL_COLORS_ALL = [ // green
-  {min: rgb('cdeaca'), max: rgb('3cb44b')}, 
   {min: rgb('cdeaca'), max: rgb('3cb44b')},
   {min: rgb('cdeaca'), max: rgb('3cb44b')},
   {min: rgb('cdeaca'), max: rgb('3cb44b')},
   {min: rgb('cdeaca'), max: rgb('3cb44b')},
-  {min: rgb('cdeaca'), max: rgb('3cb44b')}, 
   {min: rgb('cdeaca'), max: rgb('3cb44b')},
-  {min: rgb('cdeaca'), max: rgb('3cb44b')} 
+  {min: rgb('cdeaca'), max: rgb('3cb44b')},
+  {min: rgb('cdeaca'), max: rgb('3cb44b')},
+  {min: rgb('cdeaca'), max: rgb('3cb44b')}
+];
+const SINGLE_COLORS_BLUE = [
+  {min: rgb('546e7a'), max: rgb('546e7a')}, // red
+  {min: rgb('546e7a'), max: rgb('546e7a')}, // orange
+  {min: rgb('546e7a'), max: rgb('546e7a')},// yellow
+  {min: rgb('546e7a'), max: rgb('546e7a')}, // green
+  {min: rgb('546e7a'), max: rgb('546e7a')}, // cyan
+  {min: rgb('546e7a'), max: rgb('546e7a')}, // blue
+  {min: rgb('546e7a'), max: rgb('546e7a')}, // purple
+  {min: rgb('546e7a'), max: rgb('546e7a')} // navy
 ];
 
 function rgb(hex) {
@@ -90,6 +101,20 @@ function getColorForWeight(weight, colors) {
   }
 }
 
+function getColorForUnscaledWeight(weight, colors) {
+  // Make big weights darker.
+  if (weight === 0) {
+    return 'white';
+  } else if (weight > 0.5) {
+    return shadeRGBColor(colors.max, 1 - weight);
+  } else if (weight < 0.1) {
+    const one = blendRGBColors(colors.min, colors.max, weight);
+    return shadeRGBColor(one, 0.2);
+  } else {
+    return blendRGBColors(colors.min, colors.max, weight);
+  }
+}
+
 function shadeRGBColor(color, percent) {
   const f=color.split( ', '),t=percent<0?0:255,p=percent<0?percent*-1:percent,R=parseInt(f[0].slice(4)),G=parseInt(f[1]),B=parseInt(f[2]);
   return  'rgb('+(Math.round((t-R)*p)+R)+ ', '+(Math.round((t-G)*p)+G)+ ', '+(Math.round((t-B)*p)+B)+ ') ';
@@ -99,7 +124,7 @@ function blendRGBColors(c0, c1, p) {
   const f=c0.split( ', '),t=c1.split( ', '),R=parseInt(f[0].slice(4)),G=parseInt(f[1]),B=parseInt(f[2]);
   return  'rgb('+(Math.round((parseInt(t[0].slice(4))-R)*p)+R)+ ', '+(Math.round((parseInt(t[1])-G)*p)+G)+ ', '+(Math.round((parseInt(t[2])-B)*p)+B)+ ') ';
 }
-  
+
 /**************
  * DOM Helpers
  **************/
@@ -130,6 +155,21 @@ function makeHeadSelector(i, updateFn) {
  **************/
 const svgNS = 'http://www.w3.org/2000/svg';
 
+function drawMusicLine(x,w) {
+  // Giant hack so that we don't query selector all the time.
+  if (window.musicLine) {
+    return;
+  }
+  window.musicLine = document.createElementNS(svgNS, 'rect');
+  musicLine.setAttribute('id', 'musicLine');
+  musicLine.setAttribute('x', x);
+  musicLine.setAttribute('y', 0);
+  musicLine.setAttribute('width', w);
+  musicLine.setAttribute('height', music.getAttribute('height'));
+  musicLine.setAttribute('fill', 'rgba(255, 105, 180, 0.5)');
+  music.appendChild(musicLine);
+}
+
 function makeRect(which, x, y, w, h, fill="red", pitch) {
   const rect = document.createElementNS(svgNS, 'rect');
   if (which !== null && which !== undefined) {
@@ -148,6 +188,19 @@ function makeRect(which, x, y, w, h, fill="red", pitch) {
   return rect;
 }
 
+function makeShadow(x, y, w, h) {
+  const shadow = document.createElementNS(svgNS, 'rect');
+  shadow.setAttribute('class', 'shadow');
+  shadow.setAttribute('x', x + 1);
+  shadow.setAttribute('y', y + 3);
+  shadow.setAttribute('rx', 4);
+  shadow.setAttribute('ry', 4);
+  shadow.setAttribute('width', w);
+  shadow.setAttribute('height', h);
+  return shadow;
+}
+
+
 function makeLine(x, y, x2, y2, pitch) {
   const line = document.createElementNS(svgNS, 'line');
   line.dataset.index = pitch;
@@ -163,8 +216,19 @@ function makeLine(x, y, x2, y2, pitch) {
   return line;
 }
 
-function makePath(from, to, head, value, color, noteWidth, isCircle) {
+function makePath(from, to, head, value, color, noteWidth, isCircle, weirdMode, series) {
   const path = document.createElementNS(svgNS,'path');
+
+  let opacity;
+  if (value > 0.7) {
+    opacity = value;
+  } else if (value > 0.5) {
+    opacity = value - 0.05;
+  } else {
+    opacity = value - 0.05;
+  }
+  const strokeWidth = value * Math.max(4, noteWidth / 4);
+
   if (isCircle) {
     /* omfg svgs.
     Mx,y -- move to x,y
@@ -174,24 +238,29 @@ function makePath(from, to, head, value, color, noteWidth, isCircle) {
     0 -- sweep-flag, 1 is mirrored
     100,0 - length of arc
     -->
-    <path d="M100,100 
-             a1,1 
-             0 
-             0,1 
-             100,0" />
      */
-    const sweep = to.y <= from.y ? 0 : 1;
+    let sweep;
+    let arc = '1,1';
+
+    if (series === 1) {
+      // Shift the note a bit so they don't overlap.
+      to.x -= noteWidth/3;
+    }
+
+    const middleOfDrawing = music.getAttribute('height') / 2;
+    sweep = middleOfDrawing < to.y ? 1 : 0;
+
+    // If it's too close, don't go in the future
+    if (from.x - to.x < 6 * noteWidth) {
+      arc = '0,0';
+    }
+
     path.setAttribute('d',
-    `M ${from.x} ${from.y} 
-     a1,1
-     0, 
-     1, ${sweep},
+    `M ${from.x} ${from.y}
+     a${arc}
+     0,
+     0, ${sweep},
      ${to.x - from.x} ${to.y-from.y}`);
-    
-    // This is a made up number.
-    const strokeWidth = value * Math.max(4, noteWidth / 5);
-    path.setAttribute('stroke-width', Math.max(1, strokeWidth));
-    path.setAttribute('stroke-opacity', value);
   } else {
     const distX = Math.abs(to.x - from.x);
     const distY = Math.abs(to.x - from.x);
@@ -201,14 +270,14 @@ function makePath(from, to, head, value, color, noteWidth, isCircle) {
     const percentX = 0.5;
     const percentY = 0.25;
 
-    // Bezier control for from point.    
+    // Bezier control for from point.
     const x1 = from.x + dirX * (percentX * distX);
     const y1 = from.y; // from.y + dirY * (percentY * distY);
 
     // Bezier control for the second point.
     const x2 = to.x - dirX * ((1-percentX) * distX);
     const y2 = to.y; //to.y - dirY * ((1-percentY) * distY);
-    
+
     // Add an offset to the control points so that not all notes overlap.
     const  offset = (head + 1) * noteWidth / 16;
     //offset = head % 2 ? -offset : +offset;
@@ -217,15 +286,19 @@ function makePath(from, to, head, value, color, noteWidth, isCircle) {
 
     path.setAttribute('d',
         `M ${from.x} ${from.y} C ${x1+offsetX} ${y1}, ${x2-offsetX} ${y2}, ${to.x} ${to.y}`);
-    
-    // This is a made up number.
-    const strokeWidth = Math.floor(value * 10) - 6.5;
-    path.setAttribute('stroke-width', Math.max(1, strokeWidth));
   }
 
   path.setAttribute('stroke', color);
-  path.setAttribute('fill', 'none');
-      
+  path.setAttribute('stroke-width', Math.max(1, strokeWidth));
+  path.setAttribute('stroke-opacity', opacity);
+
+  if (weirdMode) {
+    path.setAttribute('fill', color);
+    path.setAttribute('fill-opacity', 0.05);
+  } else {
+    path.setAttribute('fill', 'none');
+  }
+
   const title = document.createElementNS(svgNS, 'title');
   title.textContent = value;
   path.appendChild(title);
@@ -257,11 +330,9 @@ function scaleNote(el) {
   // Scale it a bit unless it's a time because that looks weird
   const x_ = parseInt(el.getAttribute('x'));
   const y_ = parseInt(el.getAttribute('y'));
-  el.setAttribute('transform', `translate(${x_} ${y_}) scale(1 2.5) translate(-${x_} -${y_+2})`);
+  const scale = 1.75; // 2.5
+  el.setAttribute('transform', `translate(${x_} ${y_}) scale(1 ${scale}) translate(-${x_} -${y_+2})`);
 }
-
-
-
 
 
 /**************
@@ -296,3 +367,14 @@ function randomizeWeights(url) {
     console.log(JSON.stringify(json));
   });
 }
+
+function getLocationHash() {
+  const hash = window.location.hash.substring(1);
+  const params = {};
+  hash.split('&').map(hk => {
+    let temp = hk.split('=');
+      params[temp[0]] = temp[1]
+  });
+  return params;
+}
+

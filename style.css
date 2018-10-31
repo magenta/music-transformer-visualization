@@ -3,6 +3,7 @@
 * {
   box-sizing: border-box;
 }
+[hidden] { display: none !important; }
 
 body {
   font-family: "Open Sans", Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
@@ -22,10 +23,6 @@ h1, h2 {
   font-size: 2em;
 }
 
-h3 {
-  margin-top: 36px;
-}
-
 [hidden] {
   display: none !important;
 }
@@ -37,7 +34,6 @@ h3 {
 }
 .settings {
   background: white;
-  margin-right: 24px;
   padding: 24px;
   width: 310px;
   min-width:310px;
@@ -46,6 +42,9 @@ h3 {
   position: relative;
 }
 
+.settings label, .settings input {
+  font-size: 14px;
+}
 .settings.hide {
   width: 0;
   min-width: 0;
@@ -84,7 +83,6 @@ input[type="number"], select {
   height: 30px;
   margin-right: 4px;
   padding: 8px 10px;
-  font-size: inherit;
   border: 0;
   background: #EFF0F6;
   color: #3F59E8;
@@ -139,45 +137,71 @@ input[type="file"] {
   display: none;
 }
 
+/*******
+ * Attention
+ *******/
+
 svg {
   display: block;
   background: white;
 }
-rect {
+
+#music rect {
   pointer-events: all;
   margin: 0 2px;
   transition: fill 0.2s linear;
 }
-rect.hover:hover {
+
+#music rect.hover:hover {
   opacity: 0.5;
 }
-rect.playing {
+#music rect.playing {
   fill: hotpink;
 }
-rect.current, rect.current-all {
-  /* outline-offset: -4px;
-  outline: 4px solid black; */
+#music rect.current, rect.current-all {
   fill: #EB53A6;
+  xoutline: 2px dashed #EB53A6;
+  xoutline-offset: 10px;
 }
-rect.attention-all {
-  fill: #83F85B;
+/* #music[whole-step] rect.current,
+#music[whole-step] rect.current-all {
+  outline: none;
+} */
+#music rect.attention-all {
+  fill: white;
+  stroke-width: 1;
+  stroke: black;
+  rx: 2;
 }
-rect.attention-all.second {
-  fill: red;
+#music[no-paths] rect.attention-all {
+  fill: #ff1744;
+  stroke-width: 0;
 }
-rect.no-attention-all {
+#music[weird-mode] rect.attention-all {
+  fill: rgb(84, 110, 122);
+  stroke-width: 0;
+}
+
+/* #music[double] rect.attention-all {
+  fill: #e6194B;
+  stroke-width: 0;
+}
+#music[double] rect.attention-all.second {
+  fill: #3cb44b;
+} */
+#music rect.no-attention-all {
   fill: #F3F3F7;
 }
-svg path {
+#music svg path {
   pointer-events: none;
 }
 #velocities {
-  margin-top: 14px;
+  margin-top: 4px;
 }
 
 /*******
- * Head selection checkboxes 
- */
+ * Head selection checkboxes
+ *******/
 #headColors {
   display: flex;
   flex-wrap: wrap;
@@ -208,6 +232,9 @@ svg path {
   height: 30px;
 }
 
-.visualizer-container {
-  background: white;
+/*******
+ * Heatmap
+ *******/
+#heatmap {
+  margin-top: 24px;
 }

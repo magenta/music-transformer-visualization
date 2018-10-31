@@ -3,32 +3,43 @@ import {makeRect, makeLine} from './utils.js';
 export {PainterPerformance};
 
 const NUM_VELOCITY_BINS = 32;
-const VELOCITY_SVG_HEIGHT = 80;
+const VELOCITY_SVG_HEIGHT = 60;
 
 class PainterPerformance extends PainterBase {
-  constructor(svgEl, minPitch, maxPitch, steps) {
-    super(svgEl, minPitch, maxPitch, steps);
+  constructor(svgEl, mapEl, minPitch, maxPitch, steps) {
+    super(svgEl, mapEl, minPitch, maxPitch, steps);
     this.velocitySVG = document.getElementById('velocities');
 
     this.config.noteHeight = 8;
     this.config.hideGreyLines = false;
     this.config.selfAttnOnly = true;
     this.config.timeScale = 1;
+    this.config.noteWidth = 20;
 
     this.updateWidth();
   }
 
   updateWidth() {
     this.width = this.steps * this.config.timeScale + 50;
-    this.height = (this.maxPitch - this.minPitch) * this.config.noteHeight;
+    // Add some padding at the top.
+    this.height = (this.maxPitch - this.minPitch) * this.config.noteHeight + this.config.svgPadding;
+    
     this.svg.setAttribute('width', this.width);
-    this.svg.setAttribute('height', this.height);
+    
+    // Add some padding at the bottom (but dont include it in math calculations)
+    this.svg.setAttribute('height', this.height + this.config.svgPadding);
     this.velocitySVG.setAttribute('height', VELOCITY_SVG_HEIGHT);
     this.velocitySVG.setAttribute('width', this.width);
+    
+    this.config.heatmapSquare = this.width / this.steps;
+    this.heatmap.setAttribute('width', this.width);
+    this.heatmap.setAttribute('height', this.config.heatmapSquare * this.steps);
   }
 
   paintMusic(events) {
     this.clear();
+    this.stepToRectMap = {};
+    
     this.velocitySVG.innerHTML = '';
     const downNotes = {};
     let currentTime = 0;
@@ -49,7 +60,9 @@ class PainterPerformance extends PainterBase {
 
         // Make a small fake note so that we can point to the note-on.
         // This will get extended to a correct width when we hit the note-off
-        this.drawNoteBox(event.pitch, currentTime, 10, i);
+        const rect = this.drawNoteBox(event.pitch, currentTime, 10, i);
+        this.stepToRectMap[i] = rect;
+        rect.setAttribute('stepStart', currentTime);
       } else if (event.type === 'note-off') {
         this.finishDownNote(downNotes, event.pitch, currentTime, i);
         downNotes[event.pitch] = null;
@@ -87,10 +100,13 @@ class PainterPerformance extends PainterBase {
       halfway = 20;
     }
     // The note-off starts from the middle of the whole note span.
-    this.drawNoteBox(pitch, note.time + halfway, halfway, index);
-
+    const rect = this.drawNoteBox(pitch, note.time + halfway, halfway, index);
+    this.stepToRectMap[index] = rect;
+    rect.setAttribute('stepEnd', currentTime);
+    
     // Update the corresponding note-on to end at the halfway point.
-    const noteOn = document.querySelector(`rect[data-index="${note.i}"]`);
+    //const noteOn = document.querySelector(`rect[data-index="${note.i}"]`);
+    const noteOn = this.stepToRectMap[note.i];
     noteOn.setAttribute('width', halfway);
   }
 }

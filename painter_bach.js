@@ -4,26 +4,37 @@ export {PainterBach};
 const NUM_VOICES = 4;
 
 class PainterBach extends PainterBase {
-  constructor(svgEl, minPitch, maxPitch, steps) {
-    super(svgEl, minPitch, maxPitch, steps);
+  constructor(svgEl, mapEl, minPitch, maxPitch, steps, isDouble) {
+    super(svgEl, mapEl, minPitch, maxPitch, steps);
 
     // Add some Bach-specific settings.
     this.config.noteHeight = 8;
     this.config.noteWidth = 20;
+    
+    if (isDouble) {
+      this.config.svgPadding = 200;
+    }
 
     this.updateWidth();
   }
 
   updateWidth() {
     this.width = this.steps * this.config.noteWidth;
+    
     // Add some padding at the top.
     this.height = (this.maxPitch - this.minPitch) * this.config.noteHeight + this.config.svgPadding;
     this.svg.setAttribute('width', this.width);
+    
     // Add some padding at the bottom (but dont include it in math calculations)
     this.svg.setAttribute('height', this.height + this.config.svgPadding);
+    
+    this.config.heatmapSquare = this.width / this.steps;
+    this.heatmap.setAttribute('width', this.width);
+    this.heatmap.setAttribute('height', this.config.heatmapSquare * this.steps);
   }
 
   paintMusic(pitches) {
+    this.stepToRectMap = {};
     this.clear();
     
     // There are 4 voices, and their pitches come in sequence.
@@ -32,10 +43,9 @@ class PainterBach extends PainterBase {
     for (let i = 0; i < pitches.length; i++) {
       const x = step * this.config.noteWidth;
       const rect = this.drawNoteBox(pitches[i], x, this.config.noteWidth, i);
-      rect.setAttribute('pitch', pitches[i]);
-      rect.setAttribute('startStep', step);
-      rect.setAttribute('endStep', step+1);
-      
+      this.stepToRectMap[i] = rect;
+      rect.setAttribute('stepEnd', step+1);
+      rect.setAttribute('stepStart', step);
       voice++;
       // Did we finish a step?
       if (voice === NUM_VOICES) {
@@ -44,4 +54,5 @@ class PainterBach extends PainterBase {
       }
     }
   }
+ 
 }

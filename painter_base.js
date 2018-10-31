@@ -1,10 +1,11 @@
-import {svgNS, scaleArray, makeRect, makePath, scaleNote, 
-        getConnectorLocation, getColorForWeight} from './utils.js';
+import {svgNS, scaleArray, makeRect, makePath, scaleNote, drawMusicLine,
+        getConnectorLocation, getColorForWeight, getColorForUnscaledWeight} from './utils.js';
 export {PainterBase}
 
 class PainterBase {
-  constructor(svgEl, minPitch, maxPitch, steps) {
+  constructor(svgEl, mapEl, minPitch, maxPitch, steps) {
     this.svg = svgEl;
+    this.heatmap = mapEl;
     this.steps = steps;
     this.musicColor = 'rgb(0, 0, 0)'; //'rgb(245, 0, 87)';
     
@@ -28,13 +29,17 @@ class PainterBase {
 
   clear() {
     this.svg.innerHTML = '';
+    window.musicLine = null;
   }
 
   paintMusic(pitches) {
     throw new Error('paintMusic() not implemented', this);
   }
-
-  paintAttention(sequence, step, colors) {
+  
+  /******************
+   * Attention
+   *****************/
+  paintAttention(sequence, step, colors, series) {
     if (!sequence) {
       return;
     }
@@ -50,17 +55,17 @@ class PainterBase {
     for (let i = 0; i <= step; i++) {
       // Find the rect for this step.
       const el = this.findNoteAtStep(i, activeType);
-      if (el === null) {
+      if (el == null) {
         continue;
       }
       this.setTitleForNote(el, sequence[i]);
-     
+      
       if (sequence[i] >= this.config.epsilon) {
         el.setAttribute('fill', getColorForWeight(scaledSequence[i], colors));
        
          // If it's big enough to get a tentacle, draw it.
-        if (scaledSequence[i] > this.config.weightCutoff) {
-          this.drawAttentionPath(getConnectorLocation(el), activeConnector, scaledSequence[i], colors.max );
+        if (scaledSequence[i] > this.config.weightCutoff && !this.config.noPaths) {
+          this.drawAttentionPath(getConnectorLocation(el), activeConnector, scaledSequence[i], colors.max, series);
         }
       } else if (el.getAttribute('fill').trim() == 'rgb(0, 0, 0)') {
         el.setAttribute('fill', 'rgb(238, 238, 238)');
@@ -69,7 +74,7 @@ class PainterBase {
     return true;
   }
 
-  paintAllTheAttention(sequences, checkedStatuses, step, colors) {
+  paintAllTheAttention(sequences, scaledSequences, checkedStatuses, step, colors, series) {
     // This may be a made up note-off for the end of the performance
     // that doesn't have any data.
     if (!step) {
@@ -83,20 +88,21 @@ class PainterBase {
 
     if (this.config.isTop) {
       const sortedAttentions = this.getSortedAttentionsIfNeeded(step, sequences, checkedStatuses);
-      this.paintTopAttention(sortedAttentions, activeType, activeConnector, colors);
+      this.paintTopAttention(sortedAttentions, activeType, activeConnector, colors, series);
     } else {
       for (let head = 0; head < sequences.length; head++) {
-        const scaledSequence = scaleArray(sequences[head][step]);
+        const scaledSequence = scaledSequences[head][step]; //scaleArray(sequences[head][step]);
+        
         // Only paint the biggest weights for this head, and only if it's on.
         if (checkedStatuses[head]) {
-          this.paintHeadAttention(scaledSequence, head, step, activeType, activeConnector, colors);
+          this.paintHeadAttention(scaledSequence, head, step, activeType, activeConnector, colors, series);
         }
       }
     }
     return true;
   }
-
-  paintTopAttention(sortedAttentions, activeType, activeConnector, colors) {
+  
+  paintTopAttention(sortedAttentions, activeType, activeConnector, colors, series) {
     // Go through the top weights, only paint those.
     let count = 0;
     for (let i = 0; i < sortedAttentions.length; i++) {
@@ -108,35 +114,72 @@ class PainterBase {
 
       // Find the rect for this step.
       const el = this.findNoteAtStep(attn.step, activeType);
-      if (el === null) {
+      if (el == null) {
         continue;
       }
       el.setAttribute('class', 'attention-all');
       scaleNote(el);
+      
       this.drawAttentionPath(getConnectorLocation(el), activeConnector, 
-          attn.scaledValue + 0.6, colors[attn.head].max, attn.head);
+        attn.scaledValue + 0.6, colors[attn.head].max, attn.head, series);
+      
       count++;
     }
   }
 
-  paintHeadAttention(scaledSequence, head, step, activeType, activeConnector, colors) {
+  paintHeadAttention(scaledSequence, head, step, activeType, activeConnector, colors, series) {
     for (let i = 0; i < step; i++) {
       // Find the rect for this step.
       const el = this.findNoteAtStep(i, activeType);
-      if (el === null) {
+      if (el == null) {
         continue;
       }
       
       if (scaledSequence[i] > this.config.weightCutoff) {
         el.setAttribute('class', 'attention-all');
         scaleNote(el);
-        this.drawAttentionPath(getConnectorLocation(el), activeConnector, scaledSequence[i], colors[head].max, head);
+        
+        this.drawAttentionPath(getConnectorLocation(el), activeConnector, scaledSequence[i], colors[head].max, head, series);
       } else if (!el.hasAttribute('class')) {
         el.setAttribute('class', 'no-attention-all');
       }
     }
   }
-
+  
+  /******************
+   * Heatmap
+   *****************/
+  
+  paintHeatMap(heads, currentHead, checkedStatuses, colors) {
+    return;
+    if (currentHead !== -1) {
+      this.paintHeatMapRow(heads[currentHead], colors[currentHead]);
+    } 
+    // else {
+    //   for (let head = 0; head < heads.length; head++) {
+    //     // Only paint the biggest weights for this head, and only if it's on.
+    //     if (checkedStatuses[head]) {
+    //       this.paintHeatMapRow(heads[head], colors[head]);
+    //     }
+    //   }
+    // }
+  }
+  
+  paintHeatMapRow(steps, colors) {
+    const size = this.config.heatmapSquare;
+    for (let y = 0; y < steps.length; y++) { 
+      const stepData = steps[y];
+      for (let x = 0; x < stepData.length; x++) {
+        const color = getColorForUnscaledWeight(stepData[x], colors)
+        const rect = makeRect(y, size * x, size * y, size, size, color, stepData[x]);
+        this.heatmap.appendChild(rect);
+      }
+    }
+  }
+  /******************
+   * Misc helpers
+   *****************/
+  
   getPositionForPitch(pitch) {
     const whiteNotes = [21,23,24,26,28,29,31];
     // Since we scaled the canvas to not include pitches we're
@@ -198,10 +241,11 @@ class PainterBase {
   }
 
   activateNoteAtStep(step, className) {
-    const el = this.svg.querySelector(`rect[data-index="${step}"]`);
+    const el = this.stepToRectMap[step];
     if (!el) {
       return [null, null];
     }
+    drawMusicLine(el.getAttribute('x'), el.getAttribute('width'));
     const type = el.getAttribute('class').replace('hover ','');
     const connector = getConnectorLocation(el);
     el.setAttribute('class', className);
@@ -210,8 +254,9 @@ class PainterBase {
   }
 
   findNoteAtStep(step, activeType) {
-    const el = this.svg.querySelector(`rect[data-index="${step}"]`);
-    if (el === null) {
+    //const el = this.svg.querySelector(`rect[data-index="${step}"]`);
+    const el = this.stepToRectMap[step];
+    if (el == null) {
       //console.log(`Could not find the rect for index ${step}`);
       return el;
     }
@@ -230,9 +275,13 @@ class PainterBase {
     el.appendChild(title);
   }
 
-  drawAttentionPath(from, to, value, color, offset=0) {
+  drawAttentionPath(from, to, value, color, offset=0, series) {
+    if (this.config.noPaths)
+      return;
+    
     this.svg.appendChild(makePath(
-      to, from, offset, value, color, this.config.noteWidth, this.config.isCircles));
+      to, from, offset, value, color, this.config.noteWidth, 
+      this.config.isCircles, this.config.weirdMode, series));
   }
 
   drawNoteBox(pitch, x, w, index) {

@@ -12,21 +12,25 @@
   </head>
   <body>
     <div class="main">
-      <h1>Transformer visualization</h1>
-      
-      <h3>Single attention:</h3>
+      <h1>Visualizing Music Transformer</h1>
+
+      <h2>Paper figures</h2>
+      <div><a class="button" href="./bach.html#figure=1a">Fig. 1a</a>: Multiple head visualization of a Bach chorale.</div>
+      <div><a class="button" href="./bach.html#figure=1b">Fig. 1b</a>: Visualizing the first layer of the Transformer model for the Bach chorale.</div>
+      <div><a class="button" href="./bach.html#figure=1c">Fig. 1c</a>: Visualizing the last layer of the Transformer model for the Bach chorale.</div>
+      <div><a class="button" href="./bach_duo.html#figure=1d">Fig. 1d</a>: Analysis of the relative and regular attention models for an existing Bach chorale piece. <b>Note:</b> this loads a large file, and it takes a bit to load </div>
+      <div><a class="button" href="./performance.html#figure=3a">Fig. 3a</a>Visualizing motifs in a Piano performance piece. <b>Note:</b> this loads a large file, and it takes a bit to load.</div>
+      <div><a class="button" href="./performance.html#figure=3a">Fig. 3b</a>Visualizing motifs in a Piano performance piece. <b>Note:</b> this loads a large file, and it takes a bit to load.</div>
+
+      <h2>Interactive Visualizations</h2>
+      <h3>Visualizing Single attention:</h3>
       <a class="button" href="./bach.html">Bach</a>
       <a class="button" href="./performance.html">Performance</a>
-      
-      
-      <h3>Local vs Global attention comparison: </h3>
-      <a class="button" href="./double_bach.html">Bach</a>
-      
-      <br><br><br>
-      <p>(Old code is <a href="old/index.html">here</a>)</p>
-      
+
+      <h3>Analysis of the Relative vs. Regular attention for an existing piece:</h3>
+      <a class="button" href="./bach_duo.html">Bach</a>
     </div>
-   
+
     <div class="glitchButton" style="position:fixed;top:20px;right:20px;"></div>
     <script src="https://button.glitch.me/button.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js" defer></script>

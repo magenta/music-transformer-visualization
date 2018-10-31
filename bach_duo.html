@@ -8,39 +8,8 @@
 
     <link rel="stylesheet" href="./style.css">
     <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono:400|Open+Sans" rel="stylesheet">
-    <script src="./note_visualizer.js" defer></script>
     <script src="./script.js" type="module" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/@magenta/music@1.2.1"></script>
-<!--     <script>
-      fetch('https://cdn.glitch.com/a1117798-99f0-492a-98a5-96ce992df48d%2F128steps_att_plus_music.json?1537482140778')
-  .then((response) => response.json())
-  .then((json) => {
-    // Rename attention_weights to global_attention
-    json["global_weights"] = json["attention_weights"];
-    delete json["attention_weights"];
-
-    // Copy the global weights over.
-    json["local_weights"] = JSON.parse(JSON.stringify(json["global_weights"]));
-
-    // Randomize them.
-    for (let layer = 0; layer < json["local_weights"].length; layer++) {
-      const heads = json["local_weights"][layer][0];
-      for (let head = 0; head < heads.length; head++) {
-        const weights = heads[head];
-        for (let step = 0; step < weights.length; step++) {
-          const values = weights[step];
-          for (let i = 0; i < values.length; i++) {
-            // Change this value slightly.
-            const r = mm.tf.randomNormal([1], 0, 0.5).get(0);
-            values[i] = Math.max(0, r);
-          }
-        }
-
-      }
-    }
-    console.log(JSON.stringify(json));
-  });
-    </script> -->
   </head>
   <body>
     <div class="wrapper">
@@ -54,16 +23,34 @@
         <label>Note height (px)</label>
         <input id="noteHeightInput" type="number" value="8" min="0" max="200" step="1">
       </div>
-      <div class="setting" id="topMode">
+      <div class="setting">
         <label>Animate speed (ms)</label>
         <input id="playSpeedInput" type="number" value="500" min="0" max="5000" step="50">
       </div>
+      <div class="setting">
+        <label>Tempo</label>
+        <input id="tempoInput" type="number" value="120" min="0" max="200" step="1">
+      </div>
 
-      <h3>Attention weights</h3>
+      <h3>Visualization</h3>
       <div class="setting">
         <label>Circle paths</label>
         <input id="circleInput" type="checkbox" checked>
       </div>
+      <div class="setting">
+        <label>No paths</label>
+        <input id="noPathsInput" type="checkbox">
+      </div>
+      <div class="setting">
+        <label>Single colour only</label>
+        <input id="weirdModeInput" type="checkbox">
+      </div>
+      <div class="setting">
+        <label>Highlight whole step</label>
+        <input id="highlightStepInput" type="checkbox">
+      </div>
+
+      <h3>Attention weights</h3>
       <div class="setting">
         <label>Arrow cutoff weight</label>
         <input id="cutoffInput" type="number" value="0.5" min="0" max="1" step="0.01">
@@ -72,7 +59,7 @@
         <label>Epsilon</label>
         <input id="epsilonInput" type="number" value="0.00001" min="0" max="1" step="0.0001">
       </div>
-      <div class="setting" id="topMode">
+      <div class="setting">
         <label>Top weights only</label>
         <input id="topOnlyInput" type="checkbox">
       </div>
@@ -81,7 +68,7 @@
         <input id="topAmountInput" type="number" value="10" min="0" max="100" step="1">
       </div>
 
-      <h3>Current state</h3>      
+      <h3>Current state</h3>
       <div class="setting">
         <label>Step</label>
         <span id="stepText"></span>
@@ -97,39 +84,28 @@
       <div class="setting">
         <div id="headColors"></div>
       </div>
-
-      <h3>Audio roll</h3>
-      <div id="stepsPerQuarter" class="setting">
-        <label>Steps/quarter: </label>
-        <input id="stepsInput" type="number" value="80" min="0" max="200" step="1">
-      </div>
-      <div id="pixelsPerTimeStep" class="setting">
-        <label>Time scale </label>
-        <input id="pixelsInput" type="number" value="1" min="0" max="200" step="1">
-      </div>
     </div>
     <div class="main">
-      <h1><button id="drawerBtn">&lt;</button> Transformer visualization — Bach</h1>
+      <h1><button id="drawerBtn">&lt;</button>Relative vs. Regular Attention: Bach
+      (analysis of an existing piece)</h1>
       <p>
-        <label class="button">+ Load file
+        <label class="button" hidden>+ Load file
           <input id="loadBtn" type="file">
         </label>
+        <button id="loadOtherDuo">Load secondary file</button>
         <button id="resetBtn">Reset</button>
         <button id="animateBtn">Animate</button>
         <button id="playBtn">Play Audio</button>
         <button id="downloadBtn">Download MIDI</button>
-        <span id="filenameSpan"></span>
+        <span id="filenameSpan" hidden></span>
       </p>
+      <h3 id="loading">Loading...</h3>
       <br>
-      <svg id="music"></svg>
-      
-      <br>
-      <h2>Audio</h2>
-      <note-visualizer id="visualizer"></note-visualizer>
+      <div id="output" hidden>
+        <svg id="music"></svg>
+      </div>
+      <svg id="heatmap" hidden></svg>
     </div>
-   
-    <div class="glitchButton" style="position:fixed;top:20px;right:20px;"></div>
-    <script src="https://button.glitch.me/button.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js" defer></script>
   </body>
 </html>
