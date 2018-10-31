@@ -43,12 +43,12 @@ function updateEverything() {
 function loadOtherPerfFile() {
   document.getElementById('loading').hidden = false;
   document.getElementById('output').hidden = true;
-  parser.loadURL('./files/performance_big.json').then(updateEverything);
+  parser.loadURL('https://storage.googleapis.com/nips-workshop-visualization/files/performance_big.json').then(updateEverything);
 }
 function loadOtherDuoFile() {
   document.getElementById('loading').hidden = false;
   document.getElementById('output').hidden = true;
-  parser.loadURL('./files/duo_big.json').then(updateEverything);
+  parser.loadURL('https://storage.googleapis.com/nips-workshop-visualization/files/bach_duo.json').then(updateEverything);
 }
 function loadFile(e, callback) {
   document.getElementById('loading').hidden = false;
