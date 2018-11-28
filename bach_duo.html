@@ -1,19 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>Double Bach</title>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link rel="stylesheet" href="./style.css">
-    <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono:400|Open+Sans" rel="stylesheet">
-    <script src="./script.js" type="module" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/@magenta/music@1.2.1"></script>
-  </head>
-  <body>
-    <div class="wrapper">
-      <div class="settings">
+<head>
+  <title>Double Bach</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="./style.css">
+  <link href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono:400|Open+Sans" rel="stylesheet">
+  <script src="./script.js" type="module" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@magenta/music@1.2.1"></script>
+</head>
+
+<body>
+  <div class="wrapper">
+    <div class="settings">
       <h3>Piano roll</h3>
       <div class="setting" id="noteWidth">
         <label>Note width (px)</label>
@@ -87,9 +89,9 @@
     </div>
     <div class="main">
       <h1><button id="drawerBtn">&lt;</button>Relative (red) vs. Regular (green) Attention: Bach
-      (analysis of an existing piece)</h1>
+        (analysis of an existing piece)</h1>
       <p>
-        <label class="button" hidden>+ Load file
+        <label class="button">+ Load file
           <input id="loadBtn" type="file">
         </label>
         <button id="loadOtherDuo">Load secondary file</button>
@@ -107,5 +109,6 @@
       <svg id="heatmap" hidden></svg>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js" defer></script>
-  </body>
+</body>
+
 </html>
