@@ -1,27 +1,29 @@
 import {TYPES, scaleArray} from './utils.js';
-export {Parser}; 
+export {Parser};
 
 const NUM_VOICES = 4;
 
 class Parser {
   constructor(type) {
     this.type = type;
-    this.data = {}; 
-    
+    this.data = {};
+
     if (type === TYPES.DOUBLE) {
-      this.data.local = {}; 
-      this.data.global = {}; 
+      this.data.local = {};
+      this.data.global = {};
     }
   }
 
   async loadURL(url) {
+    let start = new Date();
     await fetch(url)
     .then((response) => response.json())
     .then((json) => {
+      console.log(`Downloading the file: ${new Date() - start} ms.`);
       this.parse(json);
     });
   }
-  
+
   parse(json) {
     // The weights have some extra info that's a bit different per file type.
     if (this.type === TYPES.PERFORMANCE) {
@@ -33,14 +35,38 @@ class Parser {
     } else if (this.type === TYPES.DOUBLE) {
       this.parseDoubleAttentionWeights(json);
       this.parseBachWeights(json);
-    } 
-  }
-  
-  parseSingleAttentionWeights(json) {
-    this.data.layers = [];
-    for (let i = 0; i < json.attention_weights.length; i++) {
-      this.data.layers.push({heads:json.attention_weights[i][0]});
     }
+  }
+
+  parseSingleAttentionWeights(json) {
+    let start = new Date();
+    const numSteps = json.music_text.length;
+
+    this.data.layers = [];
+    for (let layer = 0; layer < json.attention_weights.length; layer++) {
+      const layerWeights = json.attention_weights[layer][0];
+
+      // If the data is sparse, you need to populate these arrays correctly.
+      if (json.sparse) {
+        for (let head = 0; head < layerWeights.length; head++) {
+          const headWeights = layerWeights[head];
+
+          for (let step = 0; step < numSteps; step++) {
+            const weights = new Array(numSteps).fill(0);
+            const sparseWeights = headWeights[step];
+            Object.keys(sparseWeights).forEach(function(key) {
+              weights[key] = sparseWeights[key];
+            });
+            headWeights[step] = weights;
+          }
+        }
+      }
+      this.data.layers.push({heads:layerWeights});
+    }
+
+    console.log(`Parsing weights: ${new Date() - start} ms.`);
+    start = new Date();
+
     // Preemptively scale all the data.
     for (let l = 0; l < this.data.layers.length; l++) {
       this.data.layers[l].scaledHeads = [];
@@ -49,16 +75,18 @@ class Parser {
         for (let s = 0; s < this.data.layers[l].heads[h].length; s++) {
           this.data.layers[l].scaledHeads[h][s] = scaleArray(this.data.layers[l].heads[h][s]);
         }
-         
+
       }
     }
-    
+
+    console.log(`Scaling weights: ${new Date() - start} ms.`);
+
     //this.data.layers[this.layer].heads[this.head][step];
-    this.data.sequenceLength = this.data.layers[0].heads[0].length;  
+    this.data.sequenceLength = this.data.layers[0].heads[0].length;
     this.data.numHeads = this.data.layers[0].heads.length;
     this.data.numLayers = this.data.layers.length;
   }
-  
+
   parseDoubleAttentionWeights(json) {
     this.data.local.layers = [];
     this.data.global.layers = [];
@@ -68,7 +96,7 @@ class Parser {
     for (let i = 0; i < json.attention_weights_regular.length; i++) {
       this.data.global.layers.push({heads:json.attention_weights_regular[i][0]});
     }
-    
+
     // Okay. The two models may not have the same number of layers, so copy the
     // last layer over if it's missing. I'm also assuming rn they're off by 1.
     if (this.data.local.layers.length < this.data.global.layers.length) {
@@ -76,7 +104,7 @@ class Parser {
     } else if (this.data.global.layers.length < this.data.local.layers.length) {
       this.data.global.layers.push(this.data.global.layers[this.data.global.layers.length -1]);
     }
-    
+
     // Preemptively scale all the data.
     for (let l = 0; l < this.data.local.layers.length; l++) {
       this.data.local.layers[l].scaledHeads = [];
@@ -88,16 +116,16 @@ class Parser {
           this.data.local.layers[l].scaledHeads[h][s] = scaleArray(this.data.local.layers[l].heads[h][s]);
           this.data.global.layers[l].scaledHeads[h][s] = scaleArray(this.data.global.layers[l].heads[h][s]);
         }
-         
+
       }
     }
-    
+
     // The two weights should be equal, so which we use doesn't matter.
-    this.data.sequenceLength = this.data.global.layers[0].heads[0].length;  
+    this.data.sequenceLength = this.data.global.layers[0].heads[0].length;
     this.data.numHeads = this.data.global.layers[0].heads.length;
     this.data.numLayers = this.data.global.layers.length;
   }
-  
+
   getNoteSequence() {
     if (this.type === TYPES.PERFORMANCE) {
       return this.getPerformanceNoteSequence();
@@ -106,9 +134,9 @@ class Parser {
     }
   }
 
-  parseBachWeights(json) {  
+  parseBachWeights(json) {
     this.data.music = json.music;
-     
+
     if (this.type === TYPES.DOUBLE) {
       this.data.music.pop();
     }
@@ -121,11 +149,11 @@ class Parser {
   parsePerformanceWeights(json) {
     const parsed = this.parsePerformanceEvents(json.music_text);
     this.data.music = parsed.events;
-    
+
     const range =  this.getPerformancePitchRange(this.data);
     this.data.minPitch = range.min;
     this.data.maxPitch = range.max;
-    this.data.steps = parsed.totalSteps; 
+    this.data.steps = parsed.totalSteps;
   }
 
   getBachNoteSequence() {
@@ -135,8 +163,8 @@ class Parser {
     let voice = 0;
     for (let i = 0; i < this.data.music.length; i++) {
       seq.notes.push({
-        pitch: this.data.music[i], 
-        quantizedStartStep: step, 
+        pitch: this.data.music[i],
+        quantizedStartStep: step,
         quantizedEndStep: step + 1
       });
       voice++;
@@ -169,7 +197,7 @@ class Parser {
     const seq = performance.toNoteSequence();
     seq.quantizationInfo = {
       stepsPerQuarter: 50
-    }  
+    }
     seq.tempos = [{time:0, qpm:120}]
     return seq;
   }
