@@ -39,7 +39,6 @@ class Parser {
   }
 
   parseSingleAttentionWeights(json) {
-    debugger
     let start = new Date();
     const numSteps = json.music_text.length;
     let headWeights;
