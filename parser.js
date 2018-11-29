@@ -53,39 +53,39 @@ class Parser {
           headWeights = json.attention_weights[layer][0][head];
 
           for (let step = 0; step < numSteps; step++) {
-            const weights = new Array(numSteps).fill(0);
+            const weights = new Float32Array(numSteps);
             // const sparseWeights = headWeights[step];
             Object.keys(headWeights[step]).forEach(function(key) {
               weights[key] = headWeights[step][key];
             });
-            headWeights[step] = weights;
+            // Scale these weights now, not later because we don't have
+            // enough memory to keep both.
+            headWeights[step] = scaleArray(weights);
           }
         }
       }
-      this.data.layers.push({heads:json.attention_weights[layer][0]});
+      this.data.layers.push({scaledHeads:json.attention_weights[layer][0]});
     }
 
     console.log(`Parsing weights: ${new Date() - start} ms.`);
     start = new Date();
 
-    // Preemptively scale all the data.
-    for (let l = 0; l < this.data.layers.length; l++) {
-      this.data.layers[l].scaledHeads = [];
-      for (let h = 0; h < this.data.layers[l].heads.length; h++) {
-        this.data.layers[l].scaledHeads[h] = new Array(this.data.layers[l].heads[h].length);
-        for (let s = 0; s < this.data.layers[l].heads[h].length; s++) {
-          this.data.layers[l].scaledHeads[h][s] = scaleArray(this.data.layers[l].heads[h][s]);
-        }
-
-      }
-    }
-
-    console.log(`Scaling weights: ${new Date() - start} ms.`);
-
     //this.data.layers[this.layer].heads[this.head][step];
-    this.data.sequenceLength = this.data.layers[0].heads[0].length;
-    this.data.numHeads = this.data.layers[0].heads.length;
+    this.data.sequenceLength = this.data.layers[0].scaledHeads[0].length;
+    this.data.numHeads = this.data.layers[0].scaledHeads.length;
     this.data.numLayers = this.data.layers.length;
+
+    // Preemptively scale all the data.
+    // for (let l = 0; l < this.data.layers.length; l++) {
+    //   this.data.layers[l].scaledHeads = [];
+    //   for (let h = 0; h < this.data.layers[l].heads.length; h++) {
+    //     this.data.layers[l].scaledHeads[h] = new Array(this.data.layers[l].heads[h].length);
+    //     for (let s = 0; s < this.data.layers[l].heads[h].length; s++) {
+    //       this.data.layers[l].scaledHeads[h][s] = scaleArray(this.data.layers[l].heads[h][s]);
+    //     }
+    //   }
+    // }
+    // console.log(`Scaling weights: ${new Date() - start} ms.`);
   }
 
   parseDoubleAttentionWeights(json) {
