@@ -135,9 +135,9 @@ class AppManager {
         const scaledLocalHeadsData = this.data.local.layers[this.layer].scaledHeads;
         return this.painter.paintAllTheAttention(localHeadsData, scaledLocalHeadsData, checkedStatuses, step, LOCAL_COLORS_ALL, 1);
       } else {
-        const headsData = this.data.layers[this.layer].heads;
+        //const headsData = this.data.layers[this.layer].heads;
         const scaledData = this.data.layers[this.layer].scaledHeads;
-        return this.painter.paintAllTheAttention(headsData, scaledData, checkedStatuses, step, this.weirdMode? SINGLE_COLORS_BLUE : COLORS);
+        return this.painter.paintAllTheAttention(null, scaledData, checkedStatuses, step, this.weirdMode? SINGLE_COLORS_BLUE : COLORS);
       }
 
     } else {

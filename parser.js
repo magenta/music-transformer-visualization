@@ -49,8 +49,8 @@ class Parser {
       // If the data is sparse, you need to unsparsefy and repopulate
       // these arrays correctly.
       if (json.sparse) {
-        for (let head = 0; head < json.attention_weights[layer][0].length; head++) {
-          headWeights = json.attention_weights[layer][0][head];
+        for (let h = 0; h < json.attention_weights[layer][0].length; h++) {
+          headWeights = json.attention_weights[layer][0][h];
 
           for (let step = 0; step < numSteps; step++) {
             const weights = new Float32Array(numSteps);
@@ -61,6 +61,14 @@ class Parser {
             // Scale these weights now, not later because we don't have
             // enough memory to keep both.
             headWeights[step] = scaleArray(weights);
+          }
+        }
+      } else {
+        // Scale the data before saving it.
+        for (let h = 0; h < json.attention_weights[layer][0].length; h++) {
+          headWeights = json.attention_weights[layer][0][h];
+          for (let step = 0; step < numSteps; step++) {
+            headWeights[step] = scaleArray(headWeights[step]);
           }
         }
       }
@@ -76,16 +84,19 @@ class Parser {
     this.data.numLayers = this.data.layers.length;
 
     // Preemptively scale all the data.
-    // for (let l = 0; l < this.data.layers.length; l++) {
-    //   this.data.layers[l].scaledHeads = [];
-    //   for (let h = 0; h < this.data.layers[l].heads.length; h++) {
-    //     this.data.layers[l].scaledHeads[h] = new Array(this.data.layers[l].heads[h].length);
-    //     for (let s = 0; s < this.data.layers[l].heads[h].length; s++) {
-    //       this.data.layers[l].scaledHeads[h][s] = scaleArray(this.data.layers[l].heads[h][s]);
+    // if (!json.sparse) {
+    //   for (let l = 0; l < this.data.layers.length; l++) {
+    //     this.data.layers[l].scaledHeads = [];
+    //     for (let h = 0; h < this.data.layers[l].heads.length; h++) {
+    //       this.data.layers[l].scaledHeads[h] = new Array(this.data.layers[l].heads[h].length);
+    //       for (let s = 0; s < this.data.layers[l].heads[h].length; s++) {
+    //         this.data.layers[l].scaledHeads[h][s] = scaleArray(this.data.layers[l].heads[h][s]);
+    //       }
     //     }
     //   }
+    //   console.log(`Scaling weights: ${new Date() - start} ms.`);
     // }
-    // console.log(`Scaling weights: ${new Date() - start} ms.`);
+
   }
 
   parseDoubleAttentionWeights(json) {

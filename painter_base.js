@@ -8,7 +8,7 @@ class PainterBase {
     this.heatmap = mapEl;
     this.steps = steps;
     this.musicColor = 'rgb(0, 0, 0)'; //'rgb(245, 0, 87)';
-    
+
     this.config = {
       epsilon: 0.00001,
       weightCutoff:  0.5,
@@ -35,7 +35,7 @@ class PainterBase {
   paintMusic(pitches) {
     throw new Error('paintMusic() not implemented', this);
   }
-  
+
   /******************
    * Attention
    *****************/
@@ -59,10 +59,10 @@ class PainterBase {
         continue;
       }
       this.setTitleForNote(el, sequence[i]);
-      
+
       if (sequence[i] >= this.config.epsilon) {
         el.setAttribute('fill', getColorForWeight(scaledSequence[i], colors));
-       
+
          // If it's big enough to get a tentacle, draw it.
         if (scaledSequence[i] > this.config.weightCutoff && !this.config.noPaths) {
           this.drawAttentionPath(getConnectorLocation(el), activeConnector, scaledSequence[i], colors.max, series);
@@ -87,12 +87,12 @@ class PainterBase {
       return false;
 
     if (this.config.isTop) {
-      const sortedAttentions = this.getSortedAttentionsIfNeeded(step, sequences, checkedStatuses);
+      const sortedAttentions = this.getSortedAttentionsIfNeeded(step, scaledSequences, checkedStatuses);
       this.paintTopAttention(sortedAttentions, activeType, activeConnector, colors, series);
     } else {
-      for (let head = 0; head < sequences.length; head++) {
+      for (let head = 0; head < scaledSequences.length; head++) {
         const scaledSequence = scaledSequences[head][step]; //scaleArray(sequences[head][step]);
-        
+
         // Only paint the biggest weights for this head, and only if it's on.
         if (checkedStatuses[head]) {
           this.paintHeadAttention(scaledSequence, head, step, activeType, activeConnector, colors, series);
@@ -101,7 +101,7 @@ class PainterBase {
     }
     return true;
   }
-  
+
   paintTopAttention(sortedAttentions, activeType, activeConnector, colors, series) {
     // Go through the top weights, only paint those.
     let count = 0;
@@ -119,10 +119,10 @@ class PainterBase {
       }
       el.setAttribute('class', 'attention-all');
       scaleNote(el);
-      
-      this.drawAttentionPath(getConnectorLocation(el), activeConnector, 
+
+      this.drawAttentionPath(getConnectorLocation(el), activeConnector,
         attn.scaledValue + 0.6, colors[attn.head].max, attn.head, series);
-      
+
       count++;
     }
   }
@@ -134,27 +134,27 @@ class PainterBase {
       if (el == null) {
         continue;
       }
-      
+
       if (scaledSequence[i] > this.config.weightCutoff) {
         el.setAttribute('class', 'attention-all');
         scaleNote(el);
-        
+
         this.drawAttentionPath(getConnectorLocation(el), activeConnector, scaledSequence[i], colors[head].max, head, series);
       } else if (!el.hasAttribute('class')) {
         el.setAttribute('class', 'no-attention-all');
       }
     }
   }
-  
+
   /******************
    * Heatmap
    *****************/
-  
+
   paintHeatMap(heads, currentHead, checkedStatuses, colors) {
     return;
     if (currentHead !== -1) {
       this.paintHeatMapRow(heads[currentHead], colors[currentHead]);
-    } 
+    }
     // else {
     //   for (let head = 0; head < heads.length; head++) {
     //     // Only paint the biggest weights for this head, and only if it's on.
@@ -164,10 +164,10 @@ class PainterBase {
     //   }
     // }
   }
-  
+
   paintHeatMapRow(steps, colors) {
     const size = this.config.heatmapSquare;
-    for (let y = 0; y < steps.length; y++) { 
+    for (let y = 0; y < steps.length; y++) {
       const stepData = steps[y];
       for (let x = 0; x < stepData.length; x++) {
         const color = getColorForUnscaledWeight(stepData[x], colors)
@@ -179,7 +179,7 @@ class PainterBase {
   /******************
    * Misc helpers
    *****************/
-  
+
   getPositionForPitch(pitch) {
     const whiteNotes = [21,23,24,26,28,29,31];
     // Since we scaled the canvas to not include pitches we're
@@ -202,7 +202,7 @@ class PainterBase {
 
   getSortedAttentionsIfNeeded(step, sequences, checkedStatuses) {
     let sortedAttentions = [];
-    
+
     if (this.config.isTop) {
       for (let head = 0; head < sequences.length; head++) {
         // Skip this head if it's unchecked.
@@ -210,19 +210,19 @@ class PainterBase {
           continue;
         }
         const seq = sequences[head][step];
-        
+
         for (let s = 0; s < seq.length; s++) {
           if (seq[s] > this.config.epsilon) {
             sortedAttentions.push({head, value: seq[s], step: s});
           }
-        } 
+        }
       }
     }
     // Sort this array.
     sortedAttentions.sort(function(a, b) {
       return b.value - a.value;
     });
-    
+
     // Get only the top we care about;
     let subset = [];
     let subsetValues = [];
@@ -231,7 +231,7 @@ class PainterBase {
       subset.push(sortedAttentions[i]);
       subsetValues.push(sortedAttentions[i].value);
     }
-    
+
     // Scale them and add them back.
     subsetValues = scaleArray(subsetValues);
     for (let i = 0; i < sortedAttentions.length; i++) {
@@ -278,9 +278,9 @@ class PainterBase {
   drawAttentionPath(from, to, value, color, offset=0, series) {
     if (this.config.noPaths)
       return;
-    
+
     this.svg.appendChild(makePath(
-      to, from, offset, value, color, this.config.noteWidth, 
+      to, from, offset, value, color, this.config.noteWidth,
       this.config.isCircles, this.config.weirdMode, series));
   }
 
@@ -291,5 +291,5 @@ class PainterBase {
     this.svg.appendChild(rect);
     return rect;
   }
-  
+
 }
