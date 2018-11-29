@@ -39,29 +39,29 @@ class Parser {
   }
 
   parseSingleAttentionWeights(json) {
+    debugger
     let start = new Date();
     const numSteps = json.music_text.length;
 
     this.data.layers = [];
     for (let layer = 0; layer < json.attention_weights.length; layer++) {
-      const layerWeights = json.attention_weights[layer][0];
-
-      // If the data is sparse, you need to populate these arrays correctly.
+      // If the data is sparse, you need to unsparsefy and repopulate
+      // these arrays correctly.
       if (json.sparse) {
-        for (let head = 0; head < layerWeights.length; head++) {
-          const headWeights = layerWeights[head];
+        for (let head = 0; head < json.attention_weights[layer][0].length; head++) {
+          const headWeights = json.attention_weights[layer][0][head];
 
           for (let step = 0; step < numSteps; step++) {
             const weights = new Array(numSteps).fill(0);
-            const sparseWeights = headWeights[step];
-            Object.keys(sparseWeights).forEach(function(key) {
-              weights[key] = sparseWeights[key];
+            // const sparseWeights = headWeights[step];
+            Object.keys(headWeights[step]).forEach(function(key) {
+              weights[key] = headWeights[step][key];
             });
             headWeights[step] = weights;
           }
         }
       }
-      this.data.layers.push({heads:layerWeights});
+      this.data.layers.push({heads:json.attention_weights[layer][0]});
     }
 
     console.log(`Parsing weights: ${new Date() - start} ms.`);
