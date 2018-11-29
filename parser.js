@@ -42,6 +42,7 @@ class Parser {
     debugger
     let start = new Date();
     const numSteps = json.music_text.length;
+    let headWeights;
 
     this.data.layers = [];
     for (let layer = 0; layer < json.attention_weights.length; layer++) {
@@ -49,7 +50,7 @@ class Parser {
       // these arrays correctly.
       if (json.sparse) {
         for (let head = 0; head < json.attention_weights[layer][0].length; head++) {
-          const headWeights = json.attention_weights[layer][0][head];
+          headWeights = json.attention_weights[layer][0][head];
 
           for (let step = 0; step < numSteps; step++) {
             const weights = new Array(numSteps).fill(0);
