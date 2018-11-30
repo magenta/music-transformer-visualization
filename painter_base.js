@@ -105,6 +105,7 @@ class PainterBase {
   paintTopAttention(sortedAttentions, activeType, activeConnector, colors, series) {
     // Go through the top weights, only paint those.
     let count = 0;
+
     for (let i = 0; i < sortedAttentions.length; i++) {
       // If you've already painted enough attentions, stop.
       if (count === this.config.topNumber) {

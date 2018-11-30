@@ -29,7 +29,7 @@ class Parser {
     if (this.type === TYPES.PERFORMANCE) {
       this.parseSingleAttentionWeights(json);
       this.parsePerformanceWeights(json);
-    } else if (this.type === TYPES.BACH){
+    } else if (this.type === TYPES.BACH) {
       this.parseSingleAttentionWeights(json);
       this.parseBachWeights(json);
     } else if (this.type === TYPES.DOUBLE) {
@@ -57,6 +57,10 @@ class Parser {
             Object.keys(headWeights[step]).forEach(function(key) {
               weights[key] = headWeights[step][key];
             });
+
+            // Step 0 is always the pad, so zero it out.
+            weights[0] = 0;
+
             // Scale these weights now, not later because we don't have
             // enough memory to keep both.
             headWeights[step] = scaleArray(weights);
@@ -67,6 +71,8 @@ class Parser {
         for (let h = 0; h < json.attention_weights[layer][0].length; h++) {
           headWeights = json.attention_weights[layer][0][h];
           for (let step = 0; step < numSteps; step++) {
+            // Step 0 is always the pad, so zero it out.
+            headWeights[step][0] = 0;
             headWeights[step] = scaleArray(headWeights[step]);
           }
         }
