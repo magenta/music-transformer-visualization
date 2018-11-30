@@ -118,6 +118,7 @@ class PainterBase {
         continue;
       }
       el.setAttribute('class', 'attention-all');
+      el.setAttribute('fill', colors[attn.head].max);
       scaleNote(el);
 
       this.drawAttentionPath(getConnectorLocation(el), activeConnector,
@@ -137,6 +138,7 @@ class PainterBase {
 
       if (scaledSequence[i] > this.config.weightCutoff) {
         el.setAttribute('class', 'attention-all');
+        el.setAttribute('fill', colors[head].max);
         scaleNote(el);
 
         this.drawAttentionPath(getConnectorLocation(el), activeConnector, scaledSequence[i], colors[head].max, head, series);

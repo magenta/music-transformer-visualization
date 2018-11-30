@@ -168,6 +168,12 @@ svg {
   outline: none;
 } */
 #music rect.attention-all {
+  xfill: white;
+  xstroke-width: 1;
+  xstroke: black;
+  rx: 2;
+}
+#music rect.attention-all-colors {
   fill: white;
   stroke-width: 1;
   stroke: black;
