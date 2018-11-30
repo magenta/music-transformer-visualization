@@ -53,8 +53,8 @@ class PainterBase {
       return false;
 
     for (let i = 0; i <= step; i++) {
-      // Find the rect for this step.
-      const el = this.findNoteAtStep(i, activeType);
+      // Find the rect for this step. Note that the array of steps is actually for steps [-1, 0, 1]
+      const el = this.findNoteAtStep(i - 1, activeType);
       if (el == null) {
         continue;
       }
@@ -113,8 +113,8 @@ class PainterBase {
       }
       const attn = sortedAttentions[i];
 
-      // Find the rect for this step.
-      const el = this.findNoteAtStep(attn.step, activeType);
+      // Find the rect for this step. Note that the array of steps is actually for steps [-1, 0, 1]
+      const el = this.findNoteAtStep(attn.step - 1, activeType);
       if (el == null) {
         continue;
       }
@@ -131,8 +131,8 @@ class PainterBase {
 
   paintHeadAttention(scaledSequence, head, step, activeType, activeConnector, colors, series) {
     for (let i = 0; i < step; i++) {
-      // Find the rect for this step.
-      const el = this.findNoteAtStep(i, activeType);
+      // Find the rect for this step. Note that the array of steps is actually for steps [-1, 0, 1]
+      const el = this.findNoteAtStep(i - 1, activeType);
       if (el == null) {
         continue;
       }
