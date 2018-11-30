@@ -149,7 +149,7 @@ class AppManager {
         const localStepData = this.data.local.layers[this.layer].heads[this.head][step];
         return this.painter.paintAttention(localStepData, step, LOCAL_COLORS_SINGLE[this.head], 1);
       } else {
-        const stepData = this.data.layers[this.layer].heads[this.head][step];
+        const stepData = this.data.layers[this.layer].scaledHeads[this.head][step];
         return this.painter.paintAttention(stepData, step, COLORS[this.head]);
       }
     }
