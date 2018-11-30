@@ -130,6 +130,10 @@ class Parser {
         this.data.local.layers[l].scaledHeads[h] = new Array(this.data.local.layers[l].heads[h].length);
         this.data.global.layers[l].scaledHeads[h] = new Array(this.data.global.layers[l].heads[h].length);
         for (let s = 0; s < this.data.local.layers[l].heads[h].length; s++) {
+          // Step 0 is always the pad, so zero it out.
+          this.data.local.layers[l].heads[h][s][0] = 0;
+          this.data.global.layers[l].heads[h][s][0] = 0;
+
           this.data.local.layers[l].scaledHeads[h][s] = scaleArray(this.data.local.layers[l].heads[h][s]);
           this.data.global.layers[l].scaledHeads[h][s] = scaleArray(this.data.global.layers[l].heads[h][s]);
         }
