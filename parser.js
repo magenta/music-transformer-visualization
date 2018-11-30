@@ -40,7 +40,7 @@ class Parser {
 
   parseSingleAttentionWeights(json) {
     let start = new Date();
-    const numSteps = json.music_text.length;
+    const numSteps = this.type === TYPES.BACH ? json.music.length : json.music_text.length;
     let headWeights;
 
     this.data.layers = [];
