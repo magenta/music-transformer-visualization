@@ -351,6 +351,11 @@ class AppManager {
     tempoInput.addEventListener('change', (event) => {
       this.tempo = parseInt(event.target.value);
     });
+    noteMarginInput.addEventListener('change', (event) => {
+      this.painter.config.noteMargin = parseInt(event.target.value);
+      this.painter.updateWidth();
+      this.reset(true);
+    });
     weirdModeInput.addEventListener('change', (event) => {
       this.weirdMode = this.painter.config.weirdMode = event.target.checked;
       if (this.painter.config.weirdMode) {

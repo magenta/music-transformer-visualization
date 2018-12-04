@@ -11,7 +11,7 @@ class PainterPerformance extends PainterBase {
     this.velocitySVG = document.getElementById('velocities');
 
     this.config.noteHeight = 8;
-    this.config.hideGreyLines = false;
+    this.config.hideGreyLines = true;
     this.config.selfAttnOnly = true;
     this.config.timeScale = 1;
     this.config.noteWidth = 20;
@@ -20,17 +20,17 @@ class PainterPerformance extends PainterBase {
   }
 
   updateWidth() {
-    this.width = this.steps * this.config.timeScale + 50;
+    this.width = this.steps * (this.config.timeScale + this.config.noteMargin) + 50;
     // Add some padding at the top.
     this.height = (this.maxPitch - this.minPitch) * this.config.noteHeight + this.config.svgPadding;
-    
+
     this.svg.setAttribute('width', this.width);
-    
+
     // Add some padding at the bottom (but dont include it in math calculations)
     this.svg.setAttribute('height', this.height + this.config.svgPadding);
     this.velocitySVG.setAttribute('height', VELOCITY_SVG_HEIGHT);
     this.velocitySVG.setAttribute('width', this.width);
-    
+
     this.config.heatmapSquare = this.width / this.steps;
     this.heatmap.setAttribute('width', this.width);
     this.heatmap.setAttribute('height', this.config.heatmapSquare * this.steps);
@@ -39,18 +39,18 @@ class PainterPerformance extends PainterBase {
   paintMusic(events) {
     this.clear();
     this.stepToRectMap = {};
-    
+
     this.velocitySVG.innerHTML = '';
     const downNotes = {};
     let currentTime = 0;
     let previousVelocity = {x: 0, y: VELOCITY_SVG_HEIGHT};
     for (let i = 0; i < events.length; i++) {
       const event = events[i];
-      
+
       if (event.type === 'time-shift') {
         // Advance the time clock.
-        currentTime +=  event.steps * this.config.timeScale;
-        
+        currentTime +=  event.steps * (this.config.timeScale + this.config.noteMargin);
+
         // Continue this line on the whole music too.
         if (!this.config.hideGreyLines) {
           this.svg.appendChild(makeRect(null, currentTime, 0, 2, this.height, 'rgba(0, 0, 0, 0.03)', i));
@@ -85,7 +85,7 @@ class PainterPerformance extends PainterBase {
         this.finishDownNote(downNotes, pitch, currentTime);
       }
     }
-    this.placeholder = music.firstElementChild.nextElementSibling;  
+    this.placeholder = music.firstElementChild.nextElementSibling;
   }
 
   finishDownNote(notes, pitch, currentTime, index) {
@@ -103,7 +103,7 @@ class PainterPerformance extends PainterBase {
     const rect = this.drawNoteBox(pitch, note.time + halfway, halfway, index);
     this.stepToRectMap[index] = rect;
     rect.setAttribute('stepEnd', currentTime);
-    
+
     // Update the corresponding note-on to end at the halfway point.
     //const noteOn = document.querySelector(`rect[data-index="${note.i}"]`);
     const noteOn = this.stepToRectMap[note.i];

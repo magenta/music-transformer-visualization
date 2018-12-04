@@ -74,8 +74,8 @@ function initPlayer() {
 
       // TODO: this is really gross.
       if (KIND === TYPES.BACH || KIND === TYPES.DOUBLE) {
-        x = note.quantizedStartStep * app.painter.config.noteWidth;
-        w = (note.quantizedEndStep - note.quantizedStartStep) * app.painter.config.noteWidth;
+        x = note.quantizedStartStep * (app.painter.config.noteWidth + app.config.notePadding);
+        w = (note.quantizedEndStep - note.quantizedStartStep) * (app.painter.config.noteWidth + app.config.notePadding);
         currentRects = music.querySelectorAll(`rect[stepEnd="${note.quantizedEndStep}"]`);
       } else {
         x = (parser.sequenceTimeOffset + note.quantizedStartStep) * app.painter.config.timeScale;

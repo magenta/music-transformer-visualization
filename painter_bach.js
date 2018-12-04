@@ -10,7 +10,7 @@ class PainterBach extends PainterBase {
     // Add some Bach-specific settings.
     this.config.noteHeight = 8;
     this.config.noteWidth = 20;
-    
+
     if (isDouble) {
       this.config.svgPadding = 200;
     }
@@ -19,15 +19,15 @@ class PainterBach extends PainterBase {
   }
 
   updateWidth() {
-    this.width = this.steps * this.config.noteWidth;
-    
+    this.width = this.steps * (this.config.noteWidth + this.config.noteMargin);
+
     // Add some padding at the top.
     this.height = (this.maxPitch - this.minPitch) * this.config.noteHeight + this.config.svgPadding;
     this.svg.setAttribute('width', this.width);
-    
+
     // Add some padding at the bottom (but dont include it in math calculations)
     this.svg.setAttribute('height', this.height + this.config.svgPadding);
-    
+
     this.config.heatmapSquare = this.width / this.steps;
     this.heatmap.setAttribute('width', this.width);
     this.heatmap.setAttribute('height', this.config.heatmapSquare * this.steps);
@@ -36,12 +36,12 @@ class PainterBach extends PainterBase {
   paintMusic(pitches) {
     this.stepToRectMap = {};
     this.clear();
-    
+
     // There are 4 voices, and their pitches come in sequence.
     let step = 0;
     let voice = 0;
     for (let i = 0; i < pitches.length; i++) {
-      const x = step * this.config.noteWidth;
+      const x = step * (this.config.noteWidth + this.config.noteMargin);
       const rect = this.drawNoteBox(pitches[i], x, this.config.noteWidth, i);
       this.stepToRectMap[i] = rect;
       rect.setAttribute('stepEnd', step+1);
@@ -54,5 +54,5 @@ class PainterBach extends PainterBase {
       }
     }
   }
- 
+
 }

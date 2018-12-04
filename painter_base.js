@@ -15,7 +15,8 @@ class PainterBase {
       isTop: false,
       isCircles: true,
       topNumber: 10,
-      svgPadding: 100
+      svgPadding: 100,
+      noteMargin: 0
     };
 
     // Add some padding.
