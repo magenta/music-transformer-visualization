@@ -39,6 +39,10 @@ if (window.loadOtherDuo) {
 }
 function updateEverything() {
   noteSequence = parser.getNoteSequence();
+  playBtn.disabled = true;
+  player.loadSamples(noteSequence).then(() => {
+    playBtn.disabled = false;
+  });
   app.init(parser.data, KIND, initialConfig);
 }
 
@@ -120,17 +124,37 @@ function showHideDrawer(event) {
 function playOrPause(event) {
   if (player.isPlaying()) {
     player.stop();
+    window.precomputedSortedAttentions = null;
     event.target.textContent = 'Play Audio';
   } else {
     // Set the right tempo.
     if (noteSequence.tempos) {
       noteSequence.tempos[0].qpm = app.tempo;
     }
+    precomputeSortedAttentions();
     player.start(noteSequence)
     .then(() => {
+      window.precomputedSortedAttentions = null;
       event.target.textContent = 'Play Audio';
     });
     event.target.textContent = 'Stop';
+  }
+}
+
+function precomputeSortedAttentions() {
+  const step = 63;
+
+  // All heads mode.
+  const checkedStatuses = [];
+  const checkboxes = [...document.querySelectorAll('#headColors input[type="checkbox"]')];
+  checkboxes.map(x => checkedStatuses.push(x.checked));
+
+  const scaledHeadsData = app.data.layers[app.layer].scaledHeads;
+
+  window.precomputedSortedAttentions = [];
+  for (let i = 0; i < app.numSteps; i++) {
+    window.precomputedSortedAttentions.push(app.painter.getSortedAttentionsIfNeeded(
+      i, scaledHeadsData, checkedStatuses));
   }
 }
 

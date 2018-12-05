@@ -4,7 +4,7 @@
   box-sizing: border-box;
 }
 [hidden] { display: none !important; }
-
+[disabled] { opacity: 0.5; }
 body {
   font-family: "Open Sans", Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
   margin: 0;

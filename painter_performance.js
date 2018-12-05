@@ -97,8 +97,8 @@ class PainterPerformance extends PainterBase {
   finishDownNote(notes, pitch, currentTime, index) {
     const note = notes[pitch];
     if (note === null) {
-      console.log(`Found a note-off without a matching note-on at step ${
-          index} for pitch ${pitch}. Skipping!`);
+      //console.log(`Found a note-off without a matching note-on at step ${
+      //    index} for pitch ${pitch}. Skipping!`);
       return;
     }
     let halfway = (currentTime - note.time) / 2;

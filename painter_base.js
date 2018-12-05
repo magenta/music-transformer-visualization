@@ -1,17 +1,19 @@
-import {svgNS, scaleArray, makeRect, makePath, scaleNote, drawMusicLine,
-        getConnectorLocation, getColorForWeight, getColorForUnscaledWeight} from './utils.js';
-export {PainterBase}
+import {drawMusicLine, getColorForUnscaledWeight, getColorForWeight, getConnectorLocation, makePath, makeRect, scaleArray, scaleNote, svgNS} from './utils.js';
+
+export {
+  PainterBase
+}
 
 class PainterBase {
   constructor(svgEl, mapEl, minPitch, maxPitch, steps) {
     this.svg = svgEl;
     this.heatmap = mapEl;
     this.steps = steps;
-    this.musicColor = 'rgb(0, 0, 0)'; //'rgb(245, 0, 87)';
+    this.musicColor = 'rgb(0, 0, 0)';  //'rgb(245, 0, 87)';
 
     this.config = {
       epsilon: 0.00001,
-      weightCutoff:  0.5,
+      weightCutoff: 0.5,
       isTop: false,
       isCircles: true,
       topNumber: 10,
@@ -49,12 +51,13 @@ class PainterBase {
     const scaledSequence = scaleArray(sequence);
 
     // Paint the step we're looking at.
-    const [activeType, activeConnector] = this.activateNoteAtStep(step, 'current');
-    if (!activeConnector)
-      return false;
+    const [activeType, activeConnector] =
+        this.activateNoteAtStep(step, 'current');
+    if (!activeConnector) return false;
 
     for (let i = 0; i <= step; i++) {
-      // Find the rect for this step. Note that the array of steps is actually for steps [-1, 0, 1]
+      // Find the rect for this step. Note that the array of steps is actually
+      // for steps [-1, 0, 1]
       const el = this.findNoteAtStep(i - 1, activeType);
       if (el == null) {
         continue;
@@ -64,9 +67,12 @@ class PainterBase {
       if (sequence[i] >= this.config.epsilon) {
         el.setAttribute('fill', getColorForWeight(scaledSequence[i], colors));
 
-         // If it's big enough to get a tentacle, draw it.
-        if (scaledSequence[i] > this.config.weightCutoff && !this.config.noPaths) {
-          this.drawAttentionPath(getConnectorLocation(el), activeConnector, scaledSequence[i], colors.max, series);
+        // If it's big enough to get a tentacle, draw it.
+        if (scaledSequence[i] > this.config.weightCutoff &&
+            !this.config.noPaths) {
+          this.drawAttentionPath(
+              getConnectorLocation(el), activeConnector, scaledSequence[i],
+              colors.max, series);
         }
       } else if (el.getAttribute('fill').trim() == 'rgb(0, 0, 0)') {
         el.setAttribute('fill', 'rgb(238, 238, 238)');
@@ -75,7 +81,8 @@ class PainterBase {
     return true;
   }
 
-  paintAllTheAttention(sequences, scaledSequences, checkedStatuses, step, colors, series) {
+  paintAllTheAttention(
+      sequences, scaledSequences, checkedStatuses, step, colors, series) {
     // This may be a made up note-off for the end of the performance
     // that doesn't have any data.
     if (!step) {
@@ -83,27 +90,39 @@ class PainterBase {
     }
 
     // Paint the step we're looking at.
-    const [activeType, activeConnector] = this.activateNoteAtStep(step, 'current-all');
-    if (!activeConnector)
-      return false;
+    const [activeType, activeConnector] =
+        this.activateNoteAtStep(step, 'current-all');
+    if (!activeConnector) return false;
 
     if (this.config.isTop) {
-      const sortedAttentions = this.getSortedAttentionsIfNeeded(step, scaledSequences, checkedStatuses);
-      this.paintTopAttention(sortedAttentions, activeType, activeConnector, colors, series);
+      if (window.precomputedSortedAttentions) {
+        this.paintTopAttention(
+            window.precomputedSortedAttentions[step], activeType,
+            activeConnector, colors, series);
+      } else {
+        const sortedAttentions = this.getSortedAttentionsIfNeeded(
+            step, scaledSequences, checkedStatuses);
+        this.paintTopAttention(
+            sortedAttentions, activeType, activeConnector, colors, series);
+      }
     } else {
       for (let head = 0; head < scaledSequences.length; head++) {
-        const scaledSequence = scaledSequences[head][step]; //scaleArray(sequences[head][step]);
+        const scaledSequence =
+            scaledSequences[head][step];  // scaleArray(sequences[head][step]);
 
         // Only paint the biggest weights for this head, and only if it's on.
         if (checkedStatuses[head]) {
-          this.paintHeadAttention(scaledSequence, head, step, activeType, activeConnector, colors, series);
+          this.paintHeadAttention(
+              scaledSequence, head, step, activeType, activeConnector, colors,
+              series);
         }
       }
     }
     return true;
   }
 
-  paintTopAttention(sortedAttentions, activeType, activeConnector, colors, series) {
+  paintTopAttention(
+      sortedAttentions, activeType, activeConnector, colors, series) {
     // Go through the top weights, only paint those.
     let count = 0;
 
@@ -114,7 +133,8 @@ class PainterBase {
       }
       const attn = sortedAttentions[i];
 
-      // Find the rect for this step. Note that the array of steps is actually for steps [-1, 0, 1]
+      // Find the rect for this step. Note that the array of steps is actually
+      // for steps [-1, 0, 1]
       const el = this.findNoteAtStep(attn.step - 1, activeType);
       if (el == null) {
         continue;
@@ -123,16 +143,19 @@ class PainterBase {
       el.setAttribute('fill', colors[attn.head].max);
       scaleNote(el);
 
-      this.drawAttentionPath(getConnectorLocation(el), activeConnector,
-        attn.scaledValue + 0.6, colors[attn.head].max, attn.head, series);
+      this.drawAttentionPath(
+          getConnectorLocation(el), activeConnector, attn.scaledValue + 0.6,
+          colors[attn.head].max, attn.head, series);
 
       count++;
     }
   }
 
-  paintHeadAttention(scaledSequence, head, step, activeType, activeConnector, colors, series) {
+  paintHeadAttention(
+      scaledSequence, head, step, activeType, activeConnector, colors, series) {
     for (let i = 0; i < step; i++) {
-      // Find the rect for this step. Note that the array of steps is actually for steps [-1, 0, 1]
+      // Find the rect for this step. Note that the array of steps is actually
+      // for steps [-1, 0, 1]
       const el = this.findNoteAtStep(i - 1, activeType);
       if (el == null) {
         continue;
@@ -143,7 +166,9 @@ class PainterBase {
         el.setAttribute('fill', colors[head].max);
         scaleNote(el);
 
-        this.drawAttentionPath(getConnectorLocation(el), activeConnector, scaledSequence[i], colors[head].max, head, series);
+        this.drawAttentionPath(
+            getConnectorLocation(el), activeConnector, scaledSequence[i],
+            colors[head].max, head, series);
       } else if (!el.hasAttribute('class')) {
         el.setAttribute('class', 'no-attention-all');
       }
@@ -175,7 +200,8 @@ class PainterBase {
       const stepData = steps[y];
       for (let x = 0; x < stepData.length; x++) {
         const color = getColorForUnscaledWeight(stepData[x], colors)
-        const rect = makeRect(y, size * x, size * y, size, size, color, stepData[x]);
+        const rect =
+            makeRect(y, size * x, size * y, size, size, color, stepData[x]);
         this.heatmap.appendChild(rect);
       }
     }
@@ -185,13 +211,12 @@ class PainterBase {
    *****************/
 
   getPositionForPitch(pitch) {
-    const whiteNotes = [21,23,24,26,28,29,31];
+    const whiteNotes = [21, 23, 24, 26, 28, 29, 31];
     // Since we scaled the canvas to not include pitches we're
     // not painting, figure out where this actually goes.
-    const offset =  pitch - this.minPitch;
+    const offset = pitch - this.minPitch;
     // If it's a white note, it's on the pitch, otherwise it's half of.
-    if (
-        ((pitch - whiteNotes[0]) % 12 === 0) ||
+    if (((pitch - whiteNotes[0]) % 12 === 0) ||
         ((pitch - whiteNotes[1]) % 12 === 0) ||
         ((pitch - whiteNotes[2]) % 12 === 0) ||
         ((pitch - whiteNotes[3]) % 12 === 0) ||
@@ -200,7 +225,8 @@ class PainterBase {
         ((pitch - whiteNotes[6]) % 12 === 0)) {
       return this.height - offset * this.config.noteHeight;
     } else {
-      return this.height - offset * this.config.noteHeight - this.config.noteHeight/2 ;
+      return this.height - offset * this.config.noteHeight -
+          this.config.noteHeight / 2;
     }
   }
 
@@ -237,7 +263,7 @@ class PainterBase {
     }
 
     // Scale them and add them back.
-    subsetValues = scaleArray(subsetValues);
+    // subsetValues = scaleArray(subsetValues);
     for (let i = 0; i < sortedAttentions.length; i++) {
       subset[i].scaledValue = subsetValues[i];
     }
@@ -250,7 +276,7 @@ class PainterBase {
       return [null, null];
     }
     drawMusicLine(el.getAttribute('x'), el.getAttribute('width'));
-    const type = el.getAttribute('class').replace('hover ','');
+    const type = el.getAttribute('class').replace('hover ', '');
     const connector = getConnectorLocation(el);
     el.setAttribute('class', className);
     scaleNote(el);
@@ -258,14 +284,14 @@ class PainterBase {
   }
 
   findNoteAtStep(step, activeType) {
-    //const el = this.svg.querySelector(`rect[data-index="${step}"]`);
+    // const el = this.svg.querySelector(`rect[data-index="${step}"]`);
     const el = this.stepToRectMap[step];
     if (el == null) {
-      //console.log(`Could not find the rect for index ${step}`);
+      // console.log(`Could not find the rect for index ${step}`);
       return el;
     }
     // For performance, we don't want to point to non-notes.
-    const thisType = el.getAttribute('class').replace('hover ','');
+    const thisType = el.getAttribute('class').replace('hover ', '');
     if (thisType !== activeType) {
       return null;
     }
@@ -279,18 +305,18 @@ class PainterBase {
     el.appendChild(title);
   }
 
-  drawAttentionPath(from, to, value, color, offset=0, series) {
-    if (this.config.noPaths)
-      return;
+  drawAttentionPath(from, to, value, color, offset = 0, series) {
+    if (this.config.noPaths) return;
 
     this.svg.appendChild(makePath(
-      to, from, offset, value, color, this.config.noteWidth,
-      this.config.isCircles, this.config.weirdMode, series));
+        to, from, offset, value, color, this.config.noteWidth,
+        this.config.isCircles, this.config.weirdMode, series));
   }
 
   drawNoteBox(pitch, x, w, index) {
     const y = this.getPositionForPitch(pitch);
-    const rect = makeRect(index, x, y, w, this.config.noteHeight, this.musicColor, pitch);
+    const rect = makeRect(
+        index, x, y, w, this.config.noteHeight, this.musicColor, pitch);
     rect.setAttribute('class', rect.getAttribute('class') + ' note');
     this.svg.appendChild(rect);
     return rect;
