@@ -73,25 +73,13 @@ function initPlayer() {
   const player = new mm.SoundFontPlayer('https://storage.googleapis.com/magentadata/js/soundfonts/salamander');
   player.callbackObject = {
     run: (note) => {
-      let x,w;
-      let currentRects;
-
-      // TODO: this is really gross.
-      if (KIND === TYPES.BACH || KIND === TYPES.DOUBLE) {
-        x = note.quantizedStartStep * (app.painter.config.noteWidth + app.config.notePadding);
-        w = (note.quantizedEndStep - note.quantizedStartStep) * (app.painter.config.noteWidth + app.config.notePadding);
-        currentRects = music.querySelectorAll(`rect[stepEnd="${note.quantizedEndStep}"]`);
-      } else {
-        x = (parser.sequenceTimeOffset + note.quantizedStartStep) * app.painter.config.timeScale;
-        w = (note.quantizedEndStep - note.quantizedStartStep) * app.painter.config.timeScale;
-        const startNotes = `rect[stepStart="${(parser.sequenceTimeOffset + note.quantizedStartStep) * app.painter.config.timeScale}"]`;
-        const endNotes = `rect[stepStart="${(parser.sequenceTimeOffset + note.quantizedEndStep) * app.painter.config.timeScale}"]`;
-        currentRects = music.querySelectorAll(startNotes, endNotes);
-      }
+      const first = performance.now();
 
       // Paint the attention for all the active rectangles.
-      app.paintAttentionForRects(currentRects);
-      drawMusicLine(x, w);
+      app.paintAttentionForRects(window.allRects[window.currentStep]);
+      drawMusicLine(window.linePosition[window.currentStep].x, window.linePosition[window.currentStep].w);
+      console.log(performance.now() - first);
+      window.currentStep++;
     },
     stop: () => {}
   }
@@ -125,13 +113,14 @@ function playOrPause(event) {
   if (player.isPlaying()) {
     player.stop();
     window.precomputedSortedAttentions = null;
+    window.allRects = null;
     event.target.textContent = 'Play Audio';
   } else {
     // Set the right tempo.
     if (noteSequence.tempos) {
       noteSequence.tempos[0].qpm = app.tempo;
     }
-    precomputeSortedAttentions();
+    precomputeEverything();
     player.start(noteSequence)
     .then(() => {
       window.precomputedSortedAttentions = null;
@@ -141,9 +130,7 @@ function playOrPause(event) {
   }
 }
 
-function precomputeSortedAttentions() {
-  const step = 63;
-
+function precomputeEverything() {
   // All heads mode.
   const checkedStatuses = [];
   const checkboxes = [...document.querySelectorAll('#headColors input[type="checkbox"]')];
@@ -156,6 +143,31 @@ function precomputeSortedAttentions() {
     window.precomputedSortedAttentions.push(app.painter.getSortedAttentionsIfNeeded(
       i, scaledHeadsData, checkedStatuses));
   }
+
+  // Precompute the rectangles.
+  window.currentStep = 0;
+  window.allRects = [];
+  window.linePosition = [];
+  for (let i = 0; i < noteSequence.notes.length; i++) {
+    const note = noteSequence.notes[i];
+    let x,w;
+    let currentRects;
+    if (KIND !== TYPES.PERFORMANCE) {
+      x = note.quantizedStartStep * (app.painter.config.noteWidth + app.config.notePadding);
+      w = (note.quantizedEndStep - note.quantizedStartStep) * (app.painter.config.noteWidth + app.config.notePadding);
+      currentRects = music.querySelectorAll(`rect[stepEnd="${note.quantizedEndStep}"]`);
+    } else {
+      x = (parser.sequenceTimeOffset + note.quantizedStartStep) * app.painter.config.timeScale;
+      w = (note.quantizedEndStep - note.quantizedStartStep) * app.painter.config.timeScale;
+      const startNotes = `rect[stepStart="${(parser.sequenceTimeOffset + note.quantizedStartStep) * app.painter.config.timeScale}"]`;
+      const endNotes = `rect[stepStart="${(parser.sequenceTimeOffset + note.quantizedEndStep) * app.painter.config.timeScale}"]`;
+      currentRects = music.querySelectorAll(startNotes, endNotes);
+    }
+    window.linePosition.push({x:x, w:w});
+    window.allRects.push(currentRects);
+  }
+
+
 }
 
 function download(event) {
