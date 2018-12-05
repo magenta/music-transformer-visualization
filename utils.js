@@ -157,17 +157,16 @@ const svgNS = 'http://www.w3.org/2000/svg';
 
 function drawMusicLine(x,w) {
   // Giant hack so that we don't query selector all the time.
-  if (window.musicLine) {
-    return;
+  if (!window.musicLine) {
+    window.musicLine = document.createElementNS(svgNS, 'rect');
+    window.musicLine.setAttribute('id', 'musicLine');
+    window.musicLine.setAttribute('height', music.getAttribute('height'));
+    window.musicLine.setAttribute('fill', 'rgba(255, 105, 180, 0.5)');
+    music.appendChild(window.musicLine);
+    window.musicLine.setAttribute('y', 0);
   }
-  window.musicLine = document.createElementNS(svgNS, 'rect');
-  musicLine.setAttribute('id', 'musicLine');
-  musicLine.setAttribute('x', x);
-  musicLine.setAttribute('y', 0);
-  musicLine.setAttribute('width', w);
-  musicLine.setAttribute('height', music.getAttribute('height'));
-  musicLine.setAttribute('fill', 'rgba(255, 105, 180, 0.5)');
-  music.appendChild(musicLine);
+  window.musicLine.setAttribute('x', x);
+  window.musicLine.setAttribute('width', w);
 }
 
 function makeRect(which, x, y, w, h, fill="red", pitch) {
@@ -178,6 +177,9 @@ function makeRect(which, x, y, w, h, fill="red", pitch) {
   }
   rect.setAttribute('x', x);
   rect.setAttribute('y', y);
+  if (parseFloat(w) < 0) {
+    debugger
+  }
   rect.setAttribute('width', w);
   rect.setAttribute('height', h);
   rect.setAttribute('fill', fill);

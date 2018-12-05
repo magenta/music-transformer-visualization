@@ -77,6 +77,7 @@ function initPlayer() {
 
       // Paint the attention for all the active rectangles.
       app.paintAttentionForRects(window.allRects[window.currentStep]);
+
       drawMusicLine(window.linePosition[window.currentStep].x, window.linePosition[window.currentStep].w);
       console.log(performance.now() - first);
       window.currentStep++;
