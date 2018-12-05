@@ -102,7 +102,7 @@ class AppManager {
   }
 
   paintAttentionForRects(rects) {
-    this.painter.paintMusic(this.data.music);
+    this.painter.paintMusic(this.data.music, true);
     if (rects) {
       for (let i = 0; i < rects.length; i++) {
         this._updateForStep(parseInt(rects[i].dataset.index));

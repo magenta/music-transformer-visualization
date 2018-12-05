@@ -218,6 +218,7 @@ function makeLine(x, y, x2, y2, pitch) {
 
 function makePath(from, to, head, value, color, noteWidth, isCircle, weirdMode, series) {
   const path = document.createElementNS(svgNS,'path');
+  path.setAttribute('class', 'path')
 
   let opacity;
   if (value > 0.7) {

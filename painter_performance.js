@@ -38,7 +38,24 @@ class PainterPerformance extends PainterBase {
     this.heatmap.setAttribute('height', this.config.heatmapSquare * this.steps);
   }
 
-  paintMusic(events) {
+  paintMusic(events, fast) {
+    if (!fast) {
+      this._resetPaintMusic(events);
+    } else {
+      for (let key in this.stepToRectMap) {
+        const rect = this.stepToRectMap[key];
+        rect.setAttribute('class', 'hover note');
+        rect.setAttribute('fill', 'rgb(0, 0, 0)');
+        rect.removeAttribute('transform');
+      }
+      const paths = this.svg.getElementsByClassName('path');
+      while(paths[0]) {
+        paths[0].parentNode.removeChild(paths[0]);
+      }
+    }
+  }
+
+  _resetPaintMusic(events) {
     this.clear();
     this.stepToRectMap = {};
 
