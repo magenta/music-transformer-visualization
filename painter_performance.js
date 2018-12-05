@@ -1,5 +1,6 @@
 import {PainterBase} from './painter_base.js';
-import {makeRect, makeLine} from './utils.js';
+import {makeLine, makeRect} from './utils.js';
+
 export {PainterPerformance};
 
 const NUM_VELOCITY_BINS = 32;
@@ -20,9 +21,10 @@ class PainterPerformance extends PainterBase {
   }
 
   updateWidth() {
-    this.width = this.steps * (this.config.timeScale + this.config.noteMargin) + 50;
+    this.width = this.steps * this.config.timeScale + 50;
     // Add some padding at the top.
-    this.height = (this.maxPitch - this.minPitch) * this.config.noteHeight + this.config.svgPadding;
+    this.height = (this.maxPitch - this.minPitch) * this.config.noteHeight +
+        this.config.svgPadding;
 
     this.svg.setAttribute('width', this.width);
 
@@ -49,14 +51,15 @@ class PainterPerformance extends PainterBase {
 
       if (event.type === 'time-shift') {
         // Advance the time clock.
-        currentTime +=  event.steps * (this.config.timeScale + this.config.noteMargin);
+        currentTime += event.steps * this.config.timeScale;
 
         // Continue this line on the whole music too.
         if (!this.config.hideGreyLines) {
-          this.svg.appendChild(makeRect(null, currentTime, 0, 2, this.height, 'rgba(0, 0, 0, 0.03)', i));
+          this.svg.appendChild(makeRect(
+              null, currentTime, 0, 2, this.height, 'rgba(0, 0, 0, 0.03)', i));
         }
       } else if (event.type === 'note-on') {
-        downNotes[event.pitch] = {time: currentTime, i:i};
+        downNotes[event.pitch] = {time: currentTime, i: i};
 
         // Make a small fake note so that we can point to the note-on.
         // This will get extended to a correct width when we hit the note-off
@@ -68,8 +71,9 @@ class PainterPerformance extends PainterBase {
         downNotes[event.pitch] = null;
       } else if (event.type === 'velocity-change') {
         const value = event.velocityBin;
-        const y = VELOCITY_SVG_HEIGHT -  2 * value;
-        const line = makeLine(previousVelocity.x, previousVelocity.y, currentTime, y, value);
+        const y = VELOCITY_SVG_HEIGHT - 2 * value;
+        const line = makeLine(
+            previousVelocity.x, previousVelocity.y, currentTime, y, value);
         this.velocitySVG.appendChild(line);
         previousVelocity.x = currentTime;
         previousVelocity.y = y;
@@ -77,7 +81,9 @@ class PainterPerformance extends PainterBase {
     }
 
     // Finish the velocity graph.
-    const line = makeLine(previousVelocity.x, previousVelocity.y, currentTime, VELOCITY_SVG_HEIGHT, 0);
+    const line = makeLine(
+        previousVelocity.x, previousVelocity.y, currentTime,
+        VELOCITY_SVG_HEIGHT, 0);
     this.velocitySVG.appendChild(line);
     // We might have some down notes that didn't get upped, so do that now.
     for (let pitch in downNotes) {
@@ -91,21 +97,23 @@ class PainterPerformance extends PainterBase {
   finishDownNote(notes, pitch, currentTime, index) {
     const note = notes[pitch];
     if (note === null) {
-      console.log(`Found a note-off without a matching note-on at step ${index} for pitch ${pitch}. Skipping!`);
+      console.log(`Found a note-off without a matching note-on at step ${
+          index} for pitch ${pitch}. Skipping!`);
       return;
     }
-    let halfway =  (currentTime - note.time) / 2;
+    let halfway = (currentTime - note.time) / 2;
 
     if (halfway === 0) {
       halfway = 20;
     }
     // The note-off starts from the middle of the whole note span.
-    const rect = this.drawNoteBox(pitch, note.time + halfway, halfway, index);
+    const rect = this.drawNoteBox(
+        pitch, note.time + halfway, halfway - this.config.noteMargin, index);
     this.stepToRectMap[index] = rect;
     rect.setAttribute('stepEnd', currentTime);
 
     // Update the corresponding note-on to end at the halfway point.
-    //const noteOn = document.querySelector(`rect[data-index="${note.i}"]`);
+    // const noteOn = document.querySelector(`rect[data-index="${note.i}"]`);
     const noteOn = this.stepToRectMap[note.i];
     noteOn.setAttribute('width', halfway);
   }
