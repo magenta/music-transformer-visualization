@@ -340,7 +340,7 @@ class AppManager {
       this.reset(true);
     });
     noteHeightInput.addEventListener('change', (event) => {
-      this.painter.config.noteHeight = parseInt(event.target.value);
+      this.painter.config.noteHeight = parseFloat(event.target.value);
       this.painter.updateWidth();
       this.reset(true);
     });
@@ -352,7 +352,7 @@ class AppManager {
       this.tempo = parseInt(event.target.value);
     });
     noteMarginInput.addEventListener('change', (event) => {
-      this.painter.config.noteMargin = parseInt(event.target.value);
+      this.painter.config.noteMargin = parseFloat(event.target.value);
       this.painter.updateWidth();
       this.reset(true);
     });
@@ -376,7 +376,7 @@ class AppManager {
     });
     if (kind === TYPES.BACH || kind === TYPES.DOUBLE) {
       noteWidthInput.addEventListener('change', (event) => {
-        this.painter.config.noteWidth = parseInt(event.target.value);
+        this.painter.config.noteWidth = parseFloat(event.target.value);
         this.painter.updateWidth();
         this.reset(true);
       });
@@ -391,7 +391,7 @@ class AppManager {
       });
     } else if (kind === TYPES.PERFORMANCE) {
       timeScaleInput.addEventListener('change', (event) => {
-        this.painter.config.timeScale = parseInt(event.target.value);
+        this.painter.config.timeScale = parseFloat(event.target.value);
         this.painter.updateWidth();
         this.reset(true);
       });
