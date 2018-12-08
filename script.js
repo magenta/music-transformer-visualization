@@ -154,8 +154,8 @@ function precomputeEverything() {
     let x,w;
     let currentRects;
     if (KIND !== TYPES.PERFORMANCE) {
-      x = note.quantizedStartStep * (app.painter.config.noteWidth + app.config.notePadding);
-      w = (note.quantizedEndStep - note.quantizedStartStep) * (app.painter.config.noteWidth + app.config.notePadding);
+      x = note.quantizedStartStep * (app.painter.config.noteWidth + app.config.noteMargin);
+      w = (note.quantizedEndStep - note.quantizedStartStep) * (app.painter.config.noteWidth + app.config.noteMargin);
       currentRects = music.querySelectorAll(`rect[stepEnd="${note.quantizedEndStep}"]`);
     } else {
       x = (parser.sequenceTimeOffset + note.quantizedStartStep) * app.painter.config.timeScale;
