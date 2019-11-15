@@ -22,7 +22,7 @@ import { TYPES, svgNS, getLocationHash, drawMusicLine } from './utils.js';
 // TODO: fix this parsing for the anonymous link.
 const KIND = window.location.pathname.substr(1).replace('.html','')
     .replace('nips-workshop-visualization/','')
-    .replace('transformer-visualization/', '');
+    .replace('music-transformer-visualization/', '');
 
 let initialConfig = {};
 initialConfig.url = KIND ===  TYPES.BACH ?
